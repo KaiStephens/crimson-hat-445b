@@ -4,54 +4,138 @@ import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import Hero from './components/Hero';
 import Navbar from './components/Navbar';
-import FeaturedProducts from './components/FeaturedProducts';
 import Footer from './components/Footer';
+import FeaturedProducts from './components/FeaturedProducts';
 
 export default function Home() {
-  const featuredRef = useRef<HTMLDivElement>(null);
-  const featuredInView = useInView(featuredRef, { once: true, amount: 0.2 });
-
   const featuresRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: featuresRef,
     offset: ["start end", "end start"]
   });
 
+  const sustainabilityRef = useRef<HTMLDivElement>(null);
+  const sustainabilityInView = useInView(sustainabilityRef, { once: true, amount: 0.2 });
+
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 1, 0.1]);
 
   return (
-    <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
+    <main className="min-h-screen bg-black text-white">
       <Navbar />
       <Hero />
       
-      {/* Featured Products */}
+      {/* New Sustainability Section */}
       <motion.section 
-        id="featured-products"
-        ref={featuredRef}
-        className="py-24 relative"
+        id="sustainability"
+        ref={sustainabilityRef}
+        className="py-24 relative overflow-hidden bg-black"
       >
         <div className="container-sm">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
-            animate={featuredInView ? { opacity: 1, y: 0 } : {}}
+            animate={sustainabilityInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mb-14 text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Featured Collection</h2>
+            <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Our Commitment to Sustainability</h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Minimalist designs with subtle AI-inspired elements. Each piece tells a story at the intersection of technology and human creativity.
+              At the intersection of technology and environmental responsibility, we create apparel with minimal ecological footprint and maximal positive impact.
             </p>
           </motion.div>
-          <FeaturedProducts />
+          
+          {/* Sustainability Features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-16">
+            {[
+              {
+                title: "Eco-Friendly Materials",
+                description: "Our fabrics are made from organic, recycled, and responsibly sourced materials that reduce environmental impact without compromising on quality.",
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                )
+              },
+              {
+                title: "Carbon-Neutral Production",
+                description: "We offset 100% of our carbon emissions through verified climate projects, making every product carbon-neutral from manufacturing to delivery.",
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )
+              },
+              {
+                title: "AI-Optimized Design",
+                description: "Our AI algorithms optimize fabric cutting and minimize waste during production, creating designs that are both beautiful and efficient.",
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                )
+              }
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={sustainabilityInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.3 + (i * 0.2) }}
+                className="flex flex-col items-center text-center p-6 rounded-lg"
+              >
+                {feature.icon}
+                <h3 className="text-xl font-medium mb-3">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Sustainability Metrics */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={sustainabilityInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.9 }}
+            className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 text-center"
+          >
+            {[
+              { value: "95%", label: "Recycled Materials" },
+              { value: "100%", label: "Carbon Neutral" },
+              { value: "50K+", label: "Trees Planted" }
+            ].map((stat, i) => (
+              <div key={i} className="p-6">
+                <div className="text-4xl font-light mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                  {stat.value}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={sustainabilityInView ? { opacity: 1 } : {}}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="w-full h-full relative"
+          >
+            <div className="absolute top-1/4 left-[10%] w-1 h-16 bg-gradient-to-b from-green-300 to-transparent rounded-full" />
+            <div className="absolute top-1/3 right-[15%] w-1 h-24 bg-gradient-to-b from-blue-300 to-transparent rounded-full" />
+            <div className="absolute bottom-1/4 left-[20%] w-1 h-16 bg-gradient-to-b from-purple-300 to-transparent rounded-full" />
+          </motion.div>
         </div>
       </motion.section>
+
+      {/* Featured Products Section */}
+      <div className="relative z-10">
+        <FeaturedProducts />
+      </div>
 
       {/* Features */}
       <section 
         id="features" 
         ref={featuresRef}
-        className="py-28 relative overflow-hidden"
+        className="py-28 relative overflow-hidden bg-black"
       >
         {/* Background elements */}
         <div className="absolute inset-0 -z-10">

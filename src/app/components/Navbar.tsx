@@ -10,7 +10,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showCart, setShowCart] = useState(false);
-  const { cart, removeFromCart, updateQuantity, getCheckoutUrl } = useCart();
+  const { cart, cartTotal, cartId, removeFromCart, updateQuantity, getCheckoutUrl } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,15 +23,51 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calculate cart total
-  const cartTotal = cart.reduce((total: number, item: any) => {
-    return total + (Number(item.price) * item.quantity);
-  }, 0);
-
   const handleCheckout = async () => {
-    const checkoutUrl = await getCheckoutUrl();
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl;
+    if (cart.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+    
+    try {
+      setIsCheckingOut(true);
+      
+      console.log('Starting checkout process...');
+      
+      // First ensure we have a cart ID
+      if (!cartId) {
+        throw new Error('No cart ID available for checkout');
+      }
+      
+      // Call the getCheckoutUrl function from context
+      const checkoutUrl = await getCheckoutUrl();
+      
+      if (checkoutUrl) {
+        console.log(`Checkout successful, redirecting to: ${checkoutUrl}`);
+        
+        // Ensure we're actually redirecting to a valid URL
+        if (!checkoutUrl.startsWith('/') && !checkoutUrl.startsWith('http')) {
+          throw new Error('Invalid checkout URL returned');
+        }
+        
+        // Use router for internal navigation or window.location for external
+        if (checkoutUrl.startsWith('/')) {
+          // For internal routes, use a small delay to ensure state updates
+          setTimeout(() => {
+            window.location.href = checkoutUrl;
+          }, 100);
+        } else {
+          // For external URLs (like Fourthwall checkout), redirect directly
+          window.location.href = checkoutUrl;
+        }
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('There was a problem processing your checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -197,7 +234,7 @@ export default function Navbar() {
                     <div className="space-y-4 mb-8">
                       {cart.map((item: any) => (
                         <motion.div 
-                          key={item.id} 
+                          key={item.variantId} 
                           className="flex items-center py-3 border-b border-gray-200 dark:border-gray-800"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -219,7 +256,7 @@ export default function Navbar() {
                             <div className="flex items-center mt-2">
                               <button 
                                 className="p-1 text-gray-500 hover:text-black dark:hover:text-white"
-                                onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                onClick={() => updateQuantity(item.variantId, Math.max(1, item.quantity - 1))}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -228,7 +265,7 @@ export default function Navbar() {
                               <span className="mx-2 text-gray-700 dark:text-gray-300">{item.quantity}</span>
                               <button 
                                 className="p-1 text-gray-500 hover:text-black dark:hover:text-white"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -240,7 +277,7 @@ export default function Navbar() {
                           <div>
                             <button 
                               className="text-gray-500 hover:text-black dark:hover:text-white"
-                              onClick={() => removeFromCart(item.id)}
+                              onClick={() => removeFromCart(item.variantId)}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M3 6h18"></path>
@@ -252,28 +289,26 @@ export default function Navbar() {
                         </motion.div>
                       ))}
                     </div>
-                    <div className="border-t border-gray-200 dark:border-gray-800 py-4 space-y-4">
-                      <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white">
+                    <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                      <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white mb-4">
                         <p>Subtotal</p>
                         <p>${cartTotal.toFixed(2)}</p>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Shipping and taxes calculated at checkout.
-                      </p>
                       <motion.button
                         onClick={handleCheckout}
-                        className="w-full btn-primary py-3"
+                        disabled={isCheckingOut || cart.length === 0}
+                        className="w-full px-6 py-3 bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Checkout
-                      </motion.button>
-                      <motion.button
-                        onClick={() => setShowCart(false)}
-                        className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white"
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        Continue Shopping
+                        {isCheckingOut ? (
+                          <>
+                            <span className="inline-block animate-spin mr-2">⟳</span>
+                            Processing...
+                          </>
+                        ) : (
+                          'Checkout'
+                        )}
                       </motion.button>
                     </div>
                   </>

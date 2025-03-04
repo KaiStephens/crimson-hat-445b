@@ -1,53 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 
-// Sample product data
-const featuredProducts = [
-  {
-    id: '1',
-    name: 'Neural Network Tee',
-    price: 34.99,
-    imageUrl: '/images/neural-tee.jpg',
-    category: 'Clothing',
-    slug: 'neural-network-tee'
-  },
-  {
-    id: '2',
-    name: 'Algorithm Hoodie',
-    price: 59.99,
-    imageUrl: '/images/algorithm-hoodie.jpg',
-    category: 'Clothing',
-    slug: 'algorithm-hoodie'
-  },
-  {
-    id: '3',
-    name: 'Quantum Computing Mug',
-    price: 18.99,
-    imageUrl: '/images/quantum-mug.jpg',
-    category: 'Accessories',
-    slug: 'quantum-computing-mug'
-  },
-  {
-    id: '4',
-    name: 'AI Ethics Cap',
-    price: 24.99,
-    imageUrl: '/images/ai-cap.jpg',
-    category: 'Accessories',
-    slug: 'ai-ethics-cap'
-  }
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  category?: string;
+  slug: string;
+  description?: string;
+  variants?: any[];
+}
 
 export default function FeaturedProducts() {
   const [cartCount, setCartCount] = useState(0);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(sectionRef, { once: true, amount: 0.2 });
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/products');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        
+        const data = await response.json();
+        
+        // Use only the first 4 products for the featured section
+        setProducts(data.slice(0, 4));
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, []);
   
   const handleAddToCart = () => {
     setCartCount(prev => prev + 1);
   };
   
-  // Simplified and optimized animation variants
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -69,7 +75,7 @@ export default function FeaturedProducts() {
   };
   
   return (
-    <section id="featured-products" className="py-16 bg-white dark:bg-black">
+    <section id="featured-products" ref={sectionRef} className="py-16 bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-center mb-12"
@@ -78,8 +84,11 @@ export default function FeaturedProducts() {
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
         >
-          <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Featured Products</h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-white pb-4">
+            Featured Products
+          </h2>
+          
+          <p className="mt-2 text-gray-300 max-w-2xl mx-auto">
             Our most popular AI-inspired merchandise, carefully designed for tech enthusiasts and AI lovers.
           </p>
         </motion.div>
@@ -91,23 +100,51 @@ export default function FeaturedProducts() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {featuredProducts.map((product) => (
-            <motion.div
-              key={product.id}
-              variants={itemVariants}
-              style={{ willChange: 'transform, opacity' }} // Performance hint
-            >
-              <ProductCard
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                imageUrl={product.imageUrl}
-                category={product.category}
-                slug={product.slug}
-                onAddToCart={handleAddToCart}
-              />
-            </motion.div>
-          ))}
+          {isLoading ? (
+            // Loading skeletons
+            Array.from({ length: 4 }).map((_, index) => (
+              <motion.div
+                key={`skeleton-${index}`}
+                variants={itemVariants}
+                className="bg-gray-900 rounded-sm p-4 animate-pulse"
+                style={{ willChange: 'transform, opacity' }}
+              >
+                <div className="aspect-square bg-gray-800 mb-4"></div>
+                <div className="h-4 bg-gray-800 w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-800 w-1/4"></div>
+              </motion.div>
+            ))
+          ) : error ? (
+            // Error state
+            <div className="col-span-full text-center text-red-500">
+              <p>{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-red-800 text-white rounded-sm"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            // Products
+            products.map((product) => (
+              <motion.div
+                key={product.id}
+                variants={itemVariants}
+                style={{ willChange: 'transform, opacity' }}
+              >
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={product.imageUrl}
+                  category={product.category}
+                  slug={product.slug}
+                  onAddToCart={handleAddToCart}
+                />
+              </motion.div>
+            ))
+          )}
         </motion.div>
         
         <motion.div 

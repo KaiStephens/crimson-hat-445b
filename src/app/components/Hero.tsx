@@ -10,74 +10,107 @@ export default function Hero() {
   const exploreOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
-    <section className="h-screen flex items-center justify-center relative overflow-hidden">
+    <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black">
       <div className="container-sm">
         <div className="text-center max-w-3xl mx-auto relative">
-          {/* Simplified background gradient animation */}
+          {/* Sun Glare Effect - positioned behind the title */}
           <motion.div 
-            className="absolute inset-0 -z-10 rounded-full opacity-60 blur-[100px]"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(100,150,255,1) 0%, rgba(255,255,255,0) 70%)',
-              filter: 'blur(40px)',
-              willChange: 'transform, opacity' // Performance hint
-            }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[300px] h-[300px] md:w-[500px] md:h-[500px]"
             animate={{ 
-              scale: [1, 1.1, 1],
-              opacity: [0.4, 0.5, 0.4],
+              scale: [0.95, 1.15, 0.95], 
+              opacity: [0.6, 0.9, 0.6]
             }}
             transition={{ 
-              duration: 8,
-              repeat: Infinity,
-              ease: "linear"
+              duration: 6, 
+              repeat: Infinity, 
+              ease: "easeInOut"
             }}
-          />
-          
-          {/* Simplified glare effect */}
-          <motion.div 
-            className="absolute -z-10 w-[200%] h-[200%] left-[-50%] top-[-50%]"
-            style={{
-              background: 'conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0) 0%, rgba(100,150,255,0.2) 50%, rgba(255,255,255,0) 100%)',
-              willChange: 'transform' // Performance hint
-            }}
-            animate={{
-              rotate: [0, 360]
-            }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-          
-          {/* Reduced animated lines (only 3 instead of 6) */}
-          <div className="absolute inset-0 -z-10">
-            {[...Array(3)].map((_, i) => (
-              <motion.div 
+          >
+            {/* Sun core - ENHANCED */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 rounded-full bg-yellow-50 blur-xl" 
+                 style={{ 
+                   opacity: 0.9,
+                   boxShadow: '0 0 80px 40px rgba(255, 255, 200, 0.8)'
+                 }}
+            />
+            
+            {/* Sun rays - ENHANCED */}
+            {[...Array(24)].map((_, i) => (
+              <motion.div
                 key={i}
-                className="absolute top-1/2 left-1/2 h-[1px] w-full"
+                className="absolute top-1/2 left-1/2 origin-center"
                 style={{ 
-                  originX: 0,
-                  rotate: i * 60,
-                  background: 'linear-gradient(90deg, rgba(100,150,255,0) 0%, rgba(100,150,255,0.3) 50%, rgba(100,150,255,0) 100%)',
-                  boxShadow: '0 0 10px rgba(100,150,255,0.5)',
-                  willChange: 'transform, opacity' // Performance hint
+                  height: '180%',
+                  width: '4px',
+                  background: 'linear-gradient(to bottom, rgba(255, 255, 200, 0.9) 0%, rgba(255, 230, 150, 0) 80%)',
+                  transform: `translate(-50%, -50%) rotate(${i * 15}deg)`,
+                  filter: 'blur(1px)'
                 }}
-                initial={{ scaleX: 0 }}
-                animate={{ 
-                  scaleX: [0, 1, 0],
-                  opacity: [0, 0.5, 0]
+                animate={{
+                  opacity: [0.5, 0.9, 0.5],
+                  height: ['160%', '200%', '160%'],
                 }}
-                transition={{ 
-                  duration: 4,
-                  delay: i * 0.5,
+                transition={{
+                  duration: 3,
                   repeat: Infinity,
-                  repeatDelay: 2
+                  ease: "easeInOut",
+                  delay: i * 0.1 % 1
                 }}
               />
             ))}
-          </div>
+            
+            {/* Lens flare circles - ENHANCED */}
+            {[
+              { size: 40, x: '60%', y: '30%', opacity: 0.6 },
+              { size: 60, x: '-70%', y: '20%', opacity: 0.5 },
+              { size: 30, x: '40%', y: '-60%', opacity: 0.7 },
+              { size: 25, x: '-30%', y: '-40%', opacity: 0.8 },
+              { size: 20, x: '-50%', y: '50%', opacity: 0.9 }
+            ].map((flare, i) => (
+              <motion.div
+                key={`flare-${i}`}
+                className="absolute rounded-full bg-yellow-50"
+                style={{ 
+                  width: flare.size,
+                  height: flare.size,
+                  top: '50%',
+                  left: '50%',
+                  transform: `translate(${flare.x}, ${flare.y})`,
+                  filter: 'blur(2px)',
+                  opacity: flare.opacity
+                }}
+                animate={{
+                  scale: [0.8, 1.4, 0.8],
+                  opacity: [flare.opacity * 0.7, flare.opacity, flare.opacity * 0.7]
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.7
+                }}
+              />
+            ))}
+            
+            {/* Light beam sweeps - ENHANCED */}
+            <motion.div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400%] h-[20px] origin-center opacity-50"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 200, 0.9) 50%, transparent 100%)',
+                filter: 'blur(5px)'
+              }}
+              animate={{
+                rotate: [0, 360]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+          </motion.div>
           
-          {/* Main heading with optimized animations */}
+          {/* Main heading with enhanced text effect */}
           <motion.h1 
             className="text-5xl md:text-7xl font-light mb-8 tracking-tight text-gray-900 dark:text-white relative"
             initial={{ opacity: 0 }}
@@ -87,7 +120,7 @@ export default function Hero() {
             {['Minimal.', 'Sustainable.', 'AI-inspired.'].map((word, i) => (
               <motion.span 
                 key={i}
-                className="inline-block mr-4 relative"
+                className="inline-block mr-4 relative backdrop-blur-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
@@ -101,7 +134,7 @@ export default function Hero() {
             ))}
           </motion.h1>
           
-          {/* Simplified subheading without glow effect */}
+          {/* Subheading with subtle animation */}
           <motion.p 
             className="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto"
             initial={{ opacity: 0, y: 10 }}
@@ -111,7 +144,7 @@ export default function Hero() {
             Minimalist apparel crafted for the digital age. Clean lines, thoughtful designs, and subtle references to the AI technologies shaping our future.
           </motion.p>
           
-          {/* Enhanced CTA buttons - fixed Twitter link */}
+          {/* CTA buttons */}
           <motion.div 
             className="flex flex-col sm:flex-row justify-center gap-6"
             initial={{ opacity: 0, y: 10 }}
@@ -119,12 +152,21 @@ export default function Hero() {
             transition={{ delay: 0.8, duration: 0.5 }}
           >
             <motion.a
-              href="#featured-products"
+              href="#sustainability"
               className="btn-primary relative overflow-hidden group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               Shop Collection
+              
+              {/* Button hover effect */}
+              <motion.div 
+                className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100"
+                style={{
+                  background: 'linear-gradient(45deg, rgba(100,150,255,0.2) 0%, rgba(255,255,255,0.2) 100%)',
+                }}
+                transition={{ duration: 0.2 }}
+              />
             </motion.a>
             <motion.a
               href="https://x.com/artificialwear"
@@ -148,7 +190,7 @@ export default function Hero() {
         </div>
       </div>
       
-      {/* Optimized EXPLORE indicator */}
+      {/* EXPLORE indicator */}
       <motion.div 
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
         initial={{ opacity: 0 }}
@@ -156,7 +198,7 @@ export default function Hero() {
         transition={{ delay: 1, duration: 0.5 }}
         style={{ 
           opacity: exploreOpacity,
-          willChange: 'transform, opacity' // Performance hint
+          willChange: 'transform, opacity'
         }}
       >
         <motion.div

@@ -1,31 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const STOREFRONT_TOKEN = process.env.STOREFRONT_TOKEN || 'ptkn_dda67524-d1dc';
+const STOREFRONT_TOKEN = process.env.STOREFRONT_TOKEN || 'ptkn_dda67524-d1dc-4c1f-9a81-1cb75185af20';
 const API_BASE_URL = 'https://storefront-api.fourthwall.com';
 
 // Add item to cart
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cartId, productId, variantId, quantity = 1 } = body;
+    const { cartId, items } = body;
     
-    if (!cartId || !productId || !variantId) {
+    if (!cartId || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'Cart ID, Product ID, and Variant ID are required' },
+        { error: 'Cart ID and at least one item are required' },
         { status: 400 }
       );
     }
     
-    const response = await fetch(`${API_BASE_URL}/v1/carts/${cartId}/items`, {
+    const response = await fetch(`${API_BASE_URL}/v1/carts/${cartId}/add?storefront_token=${STOREFRONT_TOKEN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        storefront_token: STOREFRONT_TOKEN,
-        productId,
-        variantId,
-        quantity
+        items: items.map(item => ({
+          variantId: item.variantId,
+          quantity: item.quantity || 1
+        }))
       }),
     });
     
@@ -45,27 +45,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Update item quantity
+// Change cart items quantity
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cartId, itemId, quantity } = body;
+    const { cartId, items } = body;
     
-    if (!cartId || !itemId || quantity === undefined) {
+    if (!cartId || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'Cart ID, Item ID, and quantity are required' },
+        { error: 'Cart ID and items are required' },
         { status: 400 }
       );
     }
     
-    const response = await fetch(`${API_BASE_URL}/v1/carts/${cartId}/items/${itemId}`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_BASE_URL}/v1/carts/${cartId}/change?storefront_token=${STOREFRONT_TOKEN}`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        storefront_token: STOREFRONT_TOKEN,
-        quantity
+        items: items.map(item => ({
+          variantId: item.variantId,
+          quantity: item.quantity
+        }))
       }),
     });
     
@@ -77,7 +79,7 @@ export async function PATCH(request: NextRequest) {
     const updatedCartData = await response.json();
     return NextResponse.json(updatedCartData);
   } catch (error) {
-    console.error('Error updating item quantity:', error);
+    console.error('Error updating quantity:', error);
     return NextResponse.json(
       { error: 'Failed to update item quantity' },
       { status: 500 }
@@ -90,27 +92,31 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const cartId = searchParams.get('cartId');
-    const itemId = searchParams.get('itemId');
+    const variantId = searchParams.get('variantId');
     
-    if (!cartId || !itemId) {
+    if (!cartId || !variantId) {
       return NextResponse.json(
-        { error: 'Cart ID and Item ID are required' },
+        { error: 'Cart ID and Variant ID are required' },
         { status: 400 }
       );
     }
     
     const response = await fetch(
-      `${API_BASE_URL}/v1/carts/${cartId}/items/${itemId}?storefront_token=${STOREFRONT_TOKEN}`,
+      `${API_BASE_URL}/v1/carts/${cartId}/remove?storefront_token=${STOREFRONT_TOKEN}`,
       {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          items: [{ variantId }]
+        })
       }
     );
     
     if (!response.ok) {
-      throw new Error(`Failed to remove item from cart: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(`Failed to remove item from cart: ${JSON.stringify(errorData)}`);
     }
     
     const updatedCartData = await response.json();

@@ -10,11 +10,12 @@ interface ProductCardProps {
   price: number;
   imageUrl: string;
   slug: string;
+  variants?: any[];
   category?: string;
   onAddToCart?: () => void;
 }
 
-export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCart }: ProductCardProps) {
+export default function ProductCard({ id, name, price, imageUrl, slug, variants, onAddToCart }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -27,11 +28,26 @@ export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCa
     try {
       setIsAdding(true);
       
-      // In a real implementation, you would get the variant ID from the product data
-      // For now, we'll use a placeholder
-      const variantId = `variant-${id}`;
+      // Use the first variant if variants are provided, otherwise use a default one
+      let variantId;
       
-      await addToCart({ id, name, price, imageUrl, slug }, variantId);
+      if (variants && variants.length > 0) {
+        // Find first in-stock variant if available
+        const inStockVariant = variants.find(v => v.inStock !== false);
+        variantId = inStockVariant ? inStockVariant.id : variants[0].id;
+      } else {
+        // Fallback variant ID - This would need to be replaced with a real variant ID
+        variantId = id; // Using product ID as fallback
+      }
+      
+      // Call addToCart with product details and variant ID
+      await addToCart({ 
+        id, 
+        name, 
+        price, 
+        imageUrl, 
+        slug 
+      }, variantId);
       
       // Call the parent's onAddToCart if provided
       if (onAddToCart) {
@@ -79,8 +95,8 @@ export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCa
       
       <button
         onClick={handleAddToCart}
-        disabled={isAdding}
-        className="mt-2 px-3 py-1.5 text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-all rounded-sm w-full opacity-0 group-hover:opacity-100"
+        disabled={isAdding || (variants && variants.length > 0 && !variants.some(v => v.inStock !== false))}
+        className="mt-2 px-3 py-1.5 text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-all rounded-sm w-full opacity-0 group-hover:opacity-100 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed"
         style={{ 
           opacity: isAdding ? 1 : (isHovered ? 1 : 0),
           transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out'
@@ -88,6 +104,8 @@ export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCa
       >
         {isAdding ? (
           <span className="inline-block animate-spin">⟳</span>
+        ) : variants && variants.length > 0 && !variants.some(v => v.inStock !== false) ? (
+          'Out of stock'
         ) : (
           'Add to cart'
         )}
