@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ProductCard from './ProductCard';
+import { motion } from 'framer-motion';
 
 // Sample product data
 const featuredProducts = [
@@ -46,36 +47,80 @@ export default function FeaturedProducts() {
     setCartCount(prev => prev + 1);
   };
   
+  // Simplified and optimized animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.4,
+        staggerChildren: 0.05
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+  
   return (
-    <section className="py-16 bg-white dark:bg-slate-900">
+    <section id="featured-products" className="py-16 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
           <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Featured Products</h2>
           <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Our most popular AI-inspired merchandise, carefully designed for tech enthusiasts and AI lovers.
           </p>
-        </div>
+        </motion.div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {featuredProducts.map(product => (
-            <ProductCard
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {featuredProducts.map((product) => (
+            <motion.div
               key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              imageUrl={product.imageUrl}
-              category={product.category}
-              slug={product.slug}
-              onAddToCart={handleAddToCart}
-            />
+              variants={itemVariants}
+              style={{ willChange: 'transform, opacity' }} // Performance hint
+            >
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                imageUrl={product.imageUrl}
+                category={product.category}
+                slug={product.slug}
+                onAddToCart={handleAddToCart}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         
-        <div className="mt-12 text-center">
-          <a href="/products" className="btn-secondary inline-block">
+        <motion.div 
+          className="mt-12 text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          <a href="/products" className="btn-secondary inline-block transition-transform hover:scale-105 active:scale-95">
             View All Products
           </a>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

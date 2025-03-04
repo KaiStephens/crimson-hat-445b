@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 
@@ -46,22 +45,19 @@ export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCa
   };
   
   return (
-    <motion.div
-      className="group"
+    <div
+      className="group relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5, scale: 1.02 }}
-      transition={{ duration: 0.2 }}
     >
       <a href={`/product/${slug}`} className="block">
-        <div className="relative aspect-square mb-4 overflow-hidden bg-gray-100 dark:bg-gray-800 rounded-sm">
-          <motion.div
-            initial={{ scale: 1.1 }}
-            animate={{ scale: isHovered ? 1.05 : 1 }}
-            transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-            className="h-full w-full"
+        <div className="relative aspect-square mb-4 overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-sm">
+          <div
+            className="h-full w-full transition-transform duration-300"
+            style={{ 
+              transform: isHovered ? 'scale(1.03)' : 'scale(1)',
+              willChange: 'transform' // Performance hint
+            }}
           >
             <Image 
               src={imgError ? fallbackImage : imageUrl} 
@@ -70,43 +66,32 @@ export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCa
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
               onError={() => setImgError(true)}
+              loading="lazy"
             />
-          </motion.div>
+          </div>
         </div>
         
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
+        <div>
           <h3 className="text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">{name}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">${price.toFixed(2)}</p>
-        </motion.div>
+        </div>
       </a>
       
-      <motion.button
+      <button
         onClick={handleAddToCart}
         disabled={isAdding}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ 
-          opacity: isHovered || isAdding ? 1 : 0,
-          y: isHovered || isAdding ? 0 : 10
+        className="mt-2 px-3 py-1.5 text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-all rounded-sm w-full opacity-0 group-hover:opacity-100"
+        style={{ 
+          opacity: isAdding ? 1 : (isHovered ? 1 : 0),
+          transition: 'opacity 0.2s ease-in-out, background-color 0.2s ease-in-out'
         }}
-        whileTap={{ scale: 0.95 }}
-        className="mt-2 px-3 py-1.5 text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors rounded-sm w-full"
       >
         {isAdding ? (
-          <motion.span
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="inline-block"
-          >
-            ⟳
-          </motion.span>
+          <span className="inline-block animate-spin">⟳</span>
         ) : (
           'Add to cart'
         )}
-      </motion.button>
-    </motion.div>
+      </button>
+    </div>
   );
 } 

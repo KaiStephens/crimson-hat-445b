@@ -1,4 +1,4 @@
-# QUANTUM - Minimalist AI-Inspired Apparel
+# Artificial Wearables - Minimalist AI-Inspired Apparel
 
 A super minimalist e-commerce store for AI-inspired merchandise with clean design aesthetics and subtle animations.
 
@@ -19,37 +19,46 @@ A super minimalist e-commerce store for AI-inspired merchandise with clean desig
 
 ## Getting Started
 
-1. Clone the repository
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd artificial-wearables
+```
+
 2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env.local` file with your Storefront token:
-   ```
-   STOREFRONT_TOKEN=your_storefront_token
-   ```
+```bash
+npm install
+```
+
+3. Create a `.env.local` file in the root directory with your Fourthwall Storefront API token:
+```
+FOURTHWALL_STOREFRONT_TOKEN=your_token_here
+```
+
 4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+```bash
+npm run dev
+```
 
-## Storefront Integration
+5. Open [http://localhost:3000](http://localhost:3000) to see the site
 
-This project is designed to work with a Storefront API. The integration is currently set up with a placeholder implementation in `/src/app/api/products/route.ts`. To connect it to you actual storefront:
+## Fourthwall Integration
 
-1. Update the API route to use your specific Storefront provider's API endpoints
-2. Make sure your Storefront token is set in the `.env.local` file
-3. Adjust the data mapping in the API route to match your storefront's data structure
+This site uses the Fourthwall Storefront API to fetch products and handle checkout. To set up the integration:
 
-## Image Placeholders
+1. Make sure your `.env.local` file includes your valid Fourthwall Storefront token
+2. The API routes in `/app/api/` handle the connection to Fourthwall
+3. Ensure your Fourthwall store has products created with images
 
-This project uses placeholder images for demonstration purposes. The required images are:
+## Placeholder Images
 
-- `/public/images/neural-tee.jpg`
-- `/public/images/algorithm-hoodie.jpg`
-- `/public/images/quantum-mug.jpg`
-- `/public/images/ai-cap.jpg`
+The store uses placeholder images for demonstration purposes. The required images are:
+
+- `public/images/logo.png` - Logo for the site
+- `public/images/neural-tee.jpg` - T-shirt product image
+- `public/images/algorithm-hoodie.jpg` - Hoodie product image
+- `public/images/quantum-mug.jpg` - Mug product image
+- `public/images/ai-cap.jpg` - Cap product image
 
 ## Customization
 

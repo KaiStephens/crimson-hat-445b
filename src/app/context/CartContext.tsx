@@ -14,20 +14,20 @@ type CartItem = {
 
 type CartContextType = {
   cartId: string | null;
-  items: CartItem[];
+  cart: CartItem[];
   itemCount: number;
   isLoading: boolean;
   addToCart: (product: any, variantId: string, quantity?: number) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
-  removeItem: (itemId: string) => Promise<void>;
-  checkout: () => Promise<string>;
+  removeFromCart: (itemId: string) => Promise<void>;
+  getCheckoutUrl: () => Promise<string>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartId, setCartId] = useState<string | null>(null);
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   // Load cart from localStorage on initial render
@@ -62,7 +62,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         imageUrl: item.product.images?.[0]?.url || `/images/${item.product.slug}.jpg`,
       }));
       
-      setItems(cartItems);
+      setCart(cartItems);
     } catch (error) {
       console.error('Error fetching cart:', error);
     } finally {
@@ -163,7 +163,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
   
   // Remove item from cart
-  const removeItem = async (itemId: string) => {
+  const removeFromCart = async (itemId: string) => {
     if (!cartId) return;
     
     try {
@@ -187,7 +187,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
   
   // Checkout
-  const checkout = async (): Promise<string> => {
+  const getCheckoutUrl = async (): Promise<string> => {
     if (!cartId) {
       throw new Error('No cart available');
     }
@@ -220,19 +220,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
   
   // Calculate total number of items
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
   
   return (
     <CartContext.Provider
       value={{
         cartId,
-        items,
+        cart,
         itemCount,
         isLoading,
         addToCart,
         updateQuantity,
-        removeItem,
-        checkout,
+        removeFromCart,
+        getCheckoutUrl,
       }}
     >
       {children}

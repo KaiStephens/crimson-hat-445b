@@ -1,208 +1,265 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import ProductsGrid from './components/ProductsGrid';
-// import FeaturedProducts from './components/FeaturedProducts'; // Alternative component with predefined products
-import Footer from './components/Footer';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import Hero from './components/Hero';
+import Navbar from './components/Navbar';
+import FeaturedProducts from './components/FeaturedProducts';
+import Footer from './components/Footer';
 
 export default function Home() {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const featuredRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(featuredRef, { once: true, margin: "-100px" });
-  
-  // Parallax effect for the features section
+  const featuredInView = useInView(featuredRef, { once: true, amount: 0.2 });
+
+  const featuresRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: scrollRef,
+    target: featuresRef,
     offset: ["start end", "end start"]
   });
-  
-  const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
-  
+
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 1, 0.1]);
+
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
       <Navbar />
       <Hero />
       
-      {/* Featured Products Section */}
-      <section id="featured-products" className="py-24" ref={featuredRef}>
+      {/* Featured Products */}
+      <motion.section 
+        id="featured-products"
+        ref={featuredRef}
+        className="py-24 relative"
+      >
         <div className="container-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={featuredInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="mb-14 text-center"
+          >
+            <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Featured Collection</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+              Minimalist designs with subtle AI-inspired elements. Each piece tells a story at the intersection of technology and human creativity.
+            </p>
+          </motion.div>
+          <FeaturedProducts />
+        </div>
+      </motion.section>
+
+      {/* Features */}
+      <section 
+        id="features" 
+        ref={featuresRef}
+        className="py-28 relative overflow-hidden"
+      >
+        {/* Background elements */}
+        <div className="absolute inset-0 -z-10">
+          <motion.div
+            style={{ 
+              y, 
+              opacity,
+              background: 'linear-gradient(45deg, rgba(235,235,235,0.3) 0%, rgba(255,255,255,0) 70%)'
+            }}
+            className="absolute top-0 right-0 w-full h-full rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/4"
+          />
+          
+          {/* Create abstract design elements */}
+          {[...Array(5)].map((_, i) => (
+            <motion.div 
+              key={i}
+              className="absolute rounded-full bg-gray-100 dark:bg-gray-800"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                width: `${Math.random() * 150 + 50}px`,
+                height: `${Math.random() * 150 + 50}px`,
+                opacity: 0.1,
+              }}
+              initial={{ scale: 0, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: [0, 0.1, 0.05] }}
+              transition={{ 
+                duration: 2, 
+                delay: i * 0.2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+          
           <motion.div
             initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-12 text-center"
+            whileInView={{ opacity: 1 }}
+            className="absolute inset-0"
           >
-            <motion.h2 
-              className="text-3xl font-light mb-4 tracking-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              Featured Collection
-            </motion.h2>
-            <motion.p
-              className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              Our most popular AI-inspired pieces, crafted for those who appreciate 
-              minimal design with intellectual references.
-            </motion.p>
+            <div className="absolute top-1/4 left-1/4 w-40 h-40 border border-gray-200 dark:border-gray-800 rounded-full" />
+            <div className="absolute top-1/3 right-1/3 w-60 h-60 border border-gray-200 dark:border-gray-800 rounded-full" />
+            <div className="absolute bottom-1/4 right-1/4 w-20 h-20 border border-gray-200 dark:border-gray-800 rounded-full" />
           </motion.div>
-          
-          <ProductsGrid />
         </div>
-      </section>
-      
-      {/* Features Section with Parallax */}
-      <section className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden" ref={scrollRef}>
-        <div className="container-sm relative">
-          {/* Background elements */}
-          <motion.div 
-            className="absolute inset-0 -z-10 opacity-5"
-            style={{ y }}
+        
+        <div className="container-sm relative z-10">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-light mb-8 tracking-tight text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
           >
-            {[...Array(20)].map((_, i) => (
-              <motion.div 
-                key={i}
-                className="absolute rounded-full bg-gray-900 dark:bg-gray-100"
-                style={{
-                  width: Math.random() * 300 + 50,
-                  height: Math.random() * 300 + 50,
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                  opacity: Math.random() * 0.3,
-                }}
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                transition={{ 
-                  duration: 1.5, 
-                  delay: 0.1 * i,
-                  ease: [0.19, 1, 0.22, 1]
-                }}
-                viewport={{ once: true, margin: "-100px" }}
-              />
-            ))}
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            The Artificial Wearables Experience
+          </motion.h2>
+
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              className="p-6 flex flex-col"
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-light mb-6 tracking-tight">The Future of Fashion</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                Our designs merge artificial intelligence concepts with minimalist aesthetics.
-                Each piece is a conversation about how technology shapes our future, rendered in
-                clean, sustainable fabrics.
-              </p>
-              
-              <div className="space-y-4">
-                {[
-                  { title: 'Sustainable Materials', desc: 'Eco-friendly fabrics with minimal environmental impact' },
-                  { title: 'Ethical Production', desc: 'Fair labor practices throughout our supply chain' },
-                  { title: 'Carbon Neutral', desc: 'Offset emissions for all shipping and manufacturing' },
-                ].map((feature, i) => (
-                  <motion.div 
-                    key={i}
-                    className="flex gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 + (i * 0.1) }}
-                    viewport={{ once: true, margin: "-100px" }}
-                  >
-                    <div className="flex-shrink-0 mt-1">
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13.3334 4L6.00008 11.3333L2.66675 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-base font-medium mb-1">{feature.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 3a2 2 0 0 0-2 2"></path>
+                    <path d="M19 3a2 2 0 0 1 2 2"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2"></path>
+                    <path d="M5 21a2 2 0 0 1-2-2"></path>
+                    <path d="M9 3h1"></path>
+                    <path d="M9 21h1"></path>
+                    <path d="M14 3h1"></path>
+                    <path d="M14 21h1"></path>
+                    <path d="M3 9v1"></path>
+                    <path d="M21 9v1"></path>
+                    <path d="M3 14v1"></path>
+                    <path d="M21 14v1"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium mb-2">Minimalist Design</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Clean lines and thoughtful design elements create a modern aesthetic that speaks to the digital age while remaining timeless.
+                </p>
               </div>
             </motion.div>
-            
+
             <motion.div
-              className="relative aspect-square"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true, margin: "-100px" }}
+              className="p-6 flex flex-col"
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              viewport={{ once: true }}
             >
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-gray-200 dark:text-gray-800">
-                <path fill="currentColor" d="M40.5,-62.6C50.9,-55.3,56.9,-40.2,61.7,-25.8C66.5,-11.4,70.2,2.3,67.6,14.7C65,27.1,56.1,38.3,45.3,47.7C34.6,57.1,22,64.8,7.2,68.6C-7.6,72.4,-24.5,72.3,-38.5,65.6C-52.5,58.9,-63.6,45.5,-68.8,30.5C-74,15.5,-73.3,-1.2,-68.4,-15.8C-63.6,-30.3,-54.7,-42.7,-43,-52.2C-31.3,-61.8,-15.7,-68.5,0.7,-69.5C17.1,-70.6,30.1,-69.9,40.5,-62.6Z" transform="translate(100 100)" />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  className="bg-black text-white dark:bg-white dark:text-black rounded-full w-24 h-24 flex items-center justify-center text-lg font-light"
-                  animate={{ 
-                    scale: [1, 1.05, 1],
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  QUANTUM
-                </motion.div>
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                    <path d="m2 12 5.45 5.45"></path>
+                    <path d="m2 12 5.45-5.45"></path>
+                    <path d="M22 12l-5.45 5.45"></path>
+                    <path d="M22 12l-5.45-5.45"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium mb-2">Sustainable Materials</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Ethically sourced fabrics and eco-friendly production methods align with our commitment to sustainability and responsible innovation.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="p-6 flex flex-col"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium mb-2">AI-Inspired Patterns</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Subtle patterns and textures inspired by neural networks, algorithms, and data structures create an elegant homage to artificial intelligence.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="p-6 flex flex-col"
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium mb-2">Crafted with Care</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Each item is produced with attention to detail and quality, ensuring both comfort and durability for everyday wear.
+                </p>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
-      
-      {/* Community Signup Section */}
-      <section className="py-24">
-        <div className="container-sm">
+
+      {/* Community Sign Up */}
+      <section className="py-20 bg-gray-50 dark:bg-black">
+        <div className="container-sm text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-lg mx-auto text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-light mb-4 tracking-tight">Join Our Community</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Sign up for updates on new drops, design insights, and early access to limited editions.
+            <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Join Our Community</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-8">
+              Be the first to know about new releases, limited editions, and community events. No spam, just the good stuff.
             </p>
-            <form className="max-w-md mx-auto">
+            
+            <div className="max-w-md mx-auto">
               <div className="flex flex-col sm:flex-row gap-2">
-                <motion.input
-                  type="email"
-                  className="flex-1 px-4 py-2.5 sm:py-3 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white"
-                  placeholder="Your email"
-                  required
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ duration: 0.2 }}
+                <motion.input 
+                  type="email" 
+                  placeholder="Your email address" 
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-black dark:text-white"
+                  initial={{ x: -20, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  viewport={{ once: true }}
                 />
-                <motion.button
-                  type="submit"
-                  className="btn-primary px-6 py-2.5 sm:py-3 rounded-md"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
+                <motion.button 
+                  className="btn-primary py-3 px-6"
+                  initial={{ x: 20, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   Subscribe
                 </motion.button>
               </div>
-              <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
-            </form>
+              <motion.p 
+                className="text-xs text-gray-500 dark:text-gray-400 mt-3"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                By subscribing, you agree to our Privacy Policy and Terms of Service.
+              </motion.p>
+            </div>
           </motion.div>
         </div>
       </section>
-      
+
       <Footer />
     </main>
   );
