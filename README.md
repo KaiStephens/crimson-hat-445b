@@ -1,58 +1,58 @@
-# Next.js Framework Starter
+# Quantum Threads - AI-Inspired Merchandise Store
 
-<!-- dash-content-start -->
+A modern, sleek e-commerce platform for AI-inspired merchandise. This project showcases a clean, minimalist design with a focus on user experience and visual appeal.
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). It's deployed on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+## Features
 
-<!-- dash-content-end -->
+- **Modern UI**: Clean, minimalist design with a focus on typography and whitespace
+- **Responsive Design**: Fully responsive layout that works on all devices
+- **Dark Mode Support**: Automatic dark mode based on user preferences
+- **Interactive Elements**: Smooth animations and transitions for a polished feel
+- **Product Showcase**: Featured products section with hover effects
+- **Testimonials**: Customer reviews with ratings
+- **Newsletter Signup**: Email capture for marketing purposes
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+## Tech Stack
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/crimson-hat-445b
-```
-
-A live public deployment of this template is available at [https://crimson-hat-445b.templates.workers.dev](https://crimson-hat-445b.templates.workers.dev)
+- **Next.js**: React framework for server-rendered applications
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **Framer Motion**: Animation library for React
+- **React Icons**: Icon library
 
 ## Getting Started
 
-First, run:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
+## Image Placeholders
 
-Then run the development server (using the package manager of your choice):
+This project uses placeholder images for demonstration purposes. In a production environment, you would replace these with actual product images. The required images are:
 
-```bash
-npm run dev
-```
+- `/public/images/neural-tee.jpg`
+- `/public/images/algorithm-hoodie.jpg`
+- `/public/images/quantum-mug.jpg`
+- `/public/images/ai-cap.jpg`
+- `/public/images/avatar-1.jpg`
+- `/public/images/avatar-2.jpg`
+- `/public/images/avatar-3.jpg`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/src/app`: Main application code
+  - `/components`: Reusable UI components
+  - `/page.tsx`: Homepage
+  - `/globals.css`: Global styles
+  - `/layout.tsx`: Root layout component
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## License
 
-## Deploying To Production
-
-| Command           | Action                                       |
-| :---------------- | :------------------------------------------- |
-| `npm run build`   | Build your production site                   |
-| `npm run preview` | Preview your build locally, before deploying |
-| `npm run deploy`  | Deploy your production site to Cloudflare    |
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+MIT
