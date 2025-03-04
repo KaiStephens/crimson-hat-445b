@@ -68,7 +68,7 @@ export default function Testimonials() {
                 ))}
               </div>
               
-              <p className="text-slate-600 dark:text-slate-300">"{testimonial.content}"</p>
+              <p className="text-slate-600 dark:text-slate-300">&ldquo;{testimonial.content}&rdquo;</p>
               
               <div className="absolute -bottom-3 -right-3 w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full opacity-20"></div>
             </div>
