@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Quantum Threads | AI-Inspired Merchandise",
-  description: "Premium AI-inspired clothing, accessories, and collectibles for tech enthusiasts and AI lovers.",
+  title: "QUANTUM | Minimalist AI-Inspired Apparel",
+  description: "Minimalist, AI-inspired clothing and accessories with clean design aesthetics.",
 };
 
 export default function RootLayout({

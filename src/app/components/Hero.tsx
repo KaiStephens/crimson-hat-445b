@@ -1,45 +1,39 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
   return (
-    <div className="relative bg-slate-50 dark:bg-slate-900 overflow-hidden">
-      {/* Background decoration */}
-      <div className="hidden sm:block sm:absolute sm:inset-0">
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-indigo-100 to-transparent dark:from-indigo-900/20 dark:to-transparent opacity-50 rounded-bl-[100px]"></div>
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-violet-100 to-transparent dark:from-violet-900/20 dark:to-transparent opacity-50 rounded-tr-[100px]"></div>
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-300/30 dark:bg-cyan-600/10 rounded-full filter blur-2xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-indigo-300/30 dark:bg-indigo-600/10 rounded-full filter blur-xl"></div>
-      </div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 md:py-40">
-        <motion.div 
-          className="text-center sm:text-left max-w-3xl mx-auto sm:mx-0"
+    <section className="min-h-screen flex items-center pt-16">
+      <div className="container-sm">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-xl"
         >
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-            <span className="block text-slate-800 dark:text-slate-100">Wear The Future</span>
-            <span className="block bg-gradient-to-r from-indigo-600 to-violet-500 text-transparent bg-clip-text mt-2">
-              AI-Inspired Fashion
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
+            AI-inspired design.
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-300">
+              Minimal aesthetics.
             </span>
           </h1>
-          <p className="mt-6 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto sm:mx-0">
-            Express your passion for artificial intelligence with our premium collection of AI-inspired merchandise. From neural network patterns to algorithm aesthetics.
+          <p className="text-lg mb-8 text-gray-600 dark:text-gray-400">
+            Clothing that speaks to the future without saying too much.
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
-            <Link href="/products" className="btn-primary text-center px-8 py-3 rounded-lg text-base font-medium">
-              Shop Collection
-            </Link>
-            <Link href="/about" className="border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 px-8 py-3 rounded-lg text-base font-medium text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-              Learn More
-            </Link>
+          <div className="flex flex-wrap gap-4">
+            <motion.a 
+              href="/shop"
+              className="btn-primary"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Shop Now
+            </motion.a>
           </div>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 } 

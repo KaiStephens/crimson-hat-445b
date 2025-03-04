@@ -1,24 +1,21 @@
-# Quantum Threads - AI-Inspired Merchandise Store
+# QUANTUM - Minimalist AI-Inspired Apparel
 
-A modern, sleek e-commerce platform for AI-inspired merchandise. This project showcases a clean, minimalist design with a focus on user experience and visual appeal.
+A super minimalist e-commerce store for AI-inspired merchandise with clean design aesthetics and subtle animations.
 
 ## Features
 
-- **Modern UI**: Clean, minimalist design with a focus on typography and whitespace
-- **Responsive Design**: Fully responsive layout that works on all devices
-- **Dark Mode Support**: Automatic dark mode based on user preferences
-- **Interactive Elements**: Smooth animations and transitions for a polished feel
-- **Product Showcase**: Featured products section with hover effects
-- **Testimonials**: Customer reviews with ratings
-- **Newsletter Signup**: Email capture for marketing purposes
+- **Ultra Minimalist Design**: Clean, uncluttered interface that puts the focus on products
+- **Subtle Animations**: Tasteful motion effects that enhance the user experience without overwhelming
+- **Responsive**: Fully responsive layout that works beautifully on all devices
+- **Dark Mode Support**: Automatic dark/light theme based on user preference
+- **Storefront Integration**: Ready for integration with your e-commerce backend
 
 ## Tech Stack
 
 - **Next.js**: React framework for server-rendered applications
 - **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **Framer Motion**: Animation library for React
-- **React Icons**: Icon library
+- **Tailwind CSS**: Utility-first CSS framework for minimal styling
+- **Framer Motion**: Animation library for subtle motion effects
 
 ## Getting Started
 
@@ -27,31 +24,40 @@ A modern, sleek e-commerce platform for AI-inspired merchandise. This project sh
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Create a `.env.local` file with your Storefront token:
+   ```
+   STOREFRONT_TOKEN=your_storefront_token
+   ```
+4. Run the development server:
    ```bash
    npm run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Storefront Integration
+
+This project is designed to work with a Storefront API. The integration is currently set up with a placeholder implementation in `/src/app/api/products/route.ts`. To connect it to your actual storefront:
+
+1. Update the API route to use your specific Storefront provider's API endpoints
+2. Make sure your Storefront token is set in the `.env.local` file
+3. Adjust the data mapping in the API route to match your storefront's data structure
 
 ## Image Placeholders
 
-This project uses placeholder images for demonstration purposes. In a production environment, you would replace these with actual product images. The required images are:
+This project uses placeholder images for demonstration purposes. The required images are:
 
 - `/public/images/neural-tee.jpg`
 - `/public/images/algorithm-hoodie.jpg`
 - `/public/images/quantum-mug.jpg`
 - `/public/images/ai-cap.jpg`
-- `/public/images/avatar-1.jpg`
-- `/public/images/avatar-2.jpg`
-- `/public/images/avatar-3.jpg`
 
-## Project Structure
+## Customization
 
-- `/src/app`: Main application code
-  - `/components`: Reusable UI components
-  - `/page.tsx`: Homepage
-  - `/globals.css`: Global styles
-  - `/layout.tsx`: Root layout component
+The design is intentionally minimalist and can be easily customized:
+
+- Colors and theme variables are defined in `src/app/globals.css`
+- Typography and spacing in components can be adjusted to match your brand
+- Product grid layout and card design can be modified in the respective components
 
 ## License
 

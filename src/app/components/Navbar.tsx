@@ -2,73 +2,73 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FiShoppingCart, FiMenu, FiX } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartItems, setCartItems] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed w-full bg-white dark:bg-slate-900 shadow-sm z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-500 text-transparent bg-clip-text">
-                Quantum Threads
-              </span>
-            </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md">
+      <div className="container-sm flex items-center justify-between h-16">
+        <Link href="/" className="font-bold text-lg">
+          QUANTUM
+        </Link>
+
+        <button 
+          className="md:hidden"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
+        >
+          <div className="w-6 flex flex-col gap-1.5">
+            <motion.span 
+              animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+              className="h-0.5 w-6 bg-current block"
+            />
+            <motion.span 
+              animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
+              className="h-0.5 w-6 bg-current block"
+            />
+            <motion.span 
+              animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+              className="h-0.5 w-6 bg-current block"
+            />
           </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              Products
-            </Link>
-            <Link href="/collections" className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              Collections
-            </Link>
-            <Link href="/about" className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              About
-            </Link>
-            <button className="relative text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              <FiShoppingCart className="w-6 h-6" />
-              {cartItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItems}
-                </span>
-              )}
-            </button>
-          </div>
-          <div className="md:hidden flex items-center">
-            <button
-              className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
+        </button>
+
+        <nav className="hidden md:flex items-center space-x-8">
+          <Link href="/shop" className="text-sm uppercase tracking-wide hover:text-primary">
+            Shop
+          </Link>
+          <Link href="/about" className="text-sm uppercase tracking-wide hover:text-primary">
+            About
+          </Link>
+          <button className="text-sm uppercase tracking-wide hover:text-primary">
+            Cart (0)
+          </button>
+        </nav>
       </div>
       
       {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-slate-900 shadow-md">
-            <Link href="/products" className="block px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400">
-              Products
+      {isOpen && (
+        <motion.div 
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className="md:hidden overflow-hidden bg-white dark:bg-black"
+        >
+          <div className="container-sm py-4 flex flex-col space-y-3">
+            <Link href="/shop" className="text-sm uppercase tracking-wide py-2" onClick={() => setIsOpen(false)}>
+              Shop
             </Link>
-            <Link href="/collections" className="block px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400">
-              Collections
-            </Link>
-            <Link href="/about" className="block px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <Link href="/about" className="text-sm uppercase tracking-wide py-2" onClick={() => setIsOpen(false)}>
               About
             </Link>
-            <button className="relative flex items-center px-3 py-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400">
-              <FiShoppingCart className="w-6 h-6 mr-2" />
-              <span>Cart {cartItems > 0 && `(${cartItems})`}</span>
+            <button className="text-sm uppercase tracking-wide py-2 text-left">
+              Cart (0)
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
-    </nav>
+    </header>
   );
 } 
