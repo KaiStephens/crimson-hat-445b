@@ -10,28 +10,32 @@ const featuredProducts = [
     name: 'Neural Network Tee',
     price: 34.99,
     imageUrl: '/images/neural-tee.jpg',
-    category: 'Clothing'
+    category: 'Clothing',
+    slug: 'neural-network-tee'
   },
   {
     id: '2',
     name: 'Algorithm Hoodie',
     price: 59.99,
     imageUrl: '/images/algorithm-hoodie.jpg',
-    category: 'Clothing'
+    category: 'Clothing',
+    slug: 'algorithm-hoodie'
   },
   {
     id: '3',
     name: 'Quantum Computing Mug',
     price: 18.99,
     imageUrl: '/images/quantum-mug.jpg',
-    category: 'Accessories'
+    category: 'Accessories',
+    slug: 'quantum-computing-mug'
   },
   {
     id: '4',
     name: 'AI Ethics Cap',
     price: 24.99,
     imageUrl: '/images/ai-cap.jpg',
-    category: 'Accessories'
+    category: 'Accessories',
+    slug: 'ai-ethics-cap'
   }
 ];
 
@@ -61,6 +65,7 @@ export default function FeaturedProducts() {
               price={product.price}
               imageUrl={product.imageUrl}
               category={product.category}
+              slug={product.slug}
               onAddToCart={handleAddToCart}
             />
           ))}

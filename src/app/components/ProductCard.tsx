@@ -10,9 +10,11 @@ interface ProductCardProps {
   price: number;
   imageUrl: string;
   slug: string;
+  category?: string;
+  onAddToCart?: () => void;
 }
 
-export default function ProductCard({ id, name, price, imageUrl, slug }: ProductCardProps) {
+export default function ProductCard({ id, name, price, imageUrl, slug, onAddToCart }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   
@@ -42,6 +44,17 @@ export default function ProductCard({ id, name, price, imageUrl, slug }: Product
       </div>
       <h3 className="text-sm font-medium mb-1">{name}</h3>
       <p className="text-sm text-gray-500">${price.toFixed(2)}</p>
+      {onAddToCart && (
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onAddToCart();
+          }}
+          className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
+        >
+          Add to cart
+        </button>
+      )}
     </motion.a>
   );
 } 

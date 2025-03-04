@@ -3,6 +3,7 @@
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductsGrid from './components/ProductsGrid';
+// import FeaturedProducts from './components/FeaturedProducts'; // Alternative component with predefined products
 import Footer from './components/Footer';
 import { motion } from 'framer-motion';
 
@@ -23,6 +24,9 @@ export default function Home() {
           >
             <h2 className="text-xl font-medium mb-8">Featured Products</h2>
             <ProductsGrid />
+            
+            {/* Or use FeaturedProducts which has predefined products */}
+            {/* <FeaturedProducts /> */}
           </motion.div>
         </div>
       </section>
