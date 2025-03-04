@@ -36,7 +36,7 @@ A super minimalist e-commerce store for AI-inspired merchandise with clean desig
 
 ## Storefront Integration
 
-This project is designed to work with a Storefront API. The integration is currently set up with a placeholder implementation in `/src/app/api/products/route.ts`. To connect it to your actual storefront:
+This project is designed to work with a Storefront API. The integration is currently set up with a placeholder implementation in `/src/app/api/products/route.ts`. To connect it to you actual storefront:
 
 1. Update the API route to use your specific Storefront provider's API endpoints
 2. Make sure your Storefront token is set in the `.env.local` file
