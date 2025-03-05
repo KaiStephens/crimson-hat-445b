@@ -8,6 +8,26 @@ import { useCart } from '../../context/CartContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
+// Custom description for the Scaling Laws Beanie
+const customProductDescriptions: Record<string, string> = {
+  'scaling-laws-beanie': `
+    <p>The Scaling Laws Beanie features the elegant mathematical formula that revolutionized machine learning: L = E + (A/Nᵅ) + (B/Dᵝ).</p>
+    <p>This formula represents the foundational scaling laws of neural networks that guide modern AI development. Perfect for computer scientists, ML engineers, and anyone fascinated by the mathematics behind artificial intelligence.</p>
+    <p>Made from premium material with a comfortable fit, this beanie not only keeps you warm but also showcases your appreciation for the theoretical underpinnings of deep learning.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Soft, double-layered knit fabric</li>
+      <li>Ribbed construction for a snug fit</li>
+      <li>Embroidered formula using durable thread</li>
+      <li>One size fits most</li>
+      <li>Machine washable (gentle cycle recommended)</li>
+    </ul>
+    <p>Let the world know you understand the mathematical beauty behind neural network scaling while staying warm and stylish.</p>
+  `,
+  // Add more product descriptions as needed
+};
+
+// Interface definitions
 interface ProductImage {
   url: string;
   alt: string;
@@ -82,6 +102,12 @@ function ProductDetailContent() {
         }
         
         console.log('Found product data:', productData);
+        
+        // If we have a custom description for this product, use it
+        if (customProductDescriptions[slug]) {
+          productData.description = customProductDescriptions[slug];
+        }
+        
         setProduct(productData);
         
         // Set the first image as selected
@@ -138,17 +164,17 @@ function ProductDetailContent() {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 py-24">
           <div className="animate-pulse space-y-4">
-            <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
+            <div className="h-10 bg-gray-800 rounded w-1/4"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded"></div>
+              <div className="h-96 bg-gray-800 rounded"></div>
               <div className="space-y-4">
-                <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
-                <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
-                <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
-                <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
+                <div className="h-8 bg-gray-800 rounded w-3/4"></div>
+                <div className="h-6 bg-gray-800 rounded w-1/2"></div>
+                <div className="h-32 bg-gray-800 rounded"></div>
+                <div className="h-10 bg-gray-800 rounded w-1/3"></div>
               </div>
             </div>
           </div>
@@ -159,13 +185,13 @@ function ProductDetailContent() {
   
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black">
-        <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 py-32 text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
           <p className="mb-6">{error || "Product not found"}</p>
           <button
             onClick={() => window.history.back()}
-            className="px-6 py-3 bg-black text-white dark:bg-white dark:text-black"
+            className="px-6 py-3 bg-white text-black"
           >
             Go Back
           </button>
@@ -175,13 +201,13 @@ function ProductDetailContent() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-6xl mx-auto px-4 py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative h-[500px] w-full bg-white dark:bg-gray-900 overflow-hidden">
+            <div className="relative h-[500px] w-full bg-gray-900 overflow-hidden">
               <Image
                 src={selectedImage || product.imageUrl || fallbackImage}
                 alt={product.name}
@@ -199,7 +225,7 @@ function ProductDetailContent() {
                   <button
                     key={index}
                     onClick={() => handleImageSelect(image.url)}
-                    className={`relative w-20 h-20 bg-white dark:bg-gray-900 flex-shrink-0 ${selectedImage === image.url ? 'border-2 border-black dark:border-white' : 'border border-gray-200 dark:border-gray-700'}`}
+                    className={`relative w-20 h-20 bg-gray-900 flex-shrink-0 ${selectedImage === image.url ? 'border-2 border-white' : 'border border-gray-700'}`}
                   >
                     <Image
                       src={image.url}
@@ -223,7 +249,7 @@ function ProductDetailContent() {
             
             {/* Short Description */}
             {product.shortDescription && (
-              <div className="text-gray-600 dark:text-gray-300 text-lg">
+              <div className="text-gray-300 text-lg">
                 {product.shortDescription}
               </div>
             )}
@@ -240,8 +266,8 @@ function ProductDetailContent() {
                       key={variant.id}
                       onClick={() => setSelectedVariant(variant)}
                       className={`px-4 py-2 border ${selectedVariant?.id === variant.id 
-                        ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black' 
-                        : 'border-gray-300 dark:border-gray-700'} 
+                        ? 'border-white bg-white text-black' 
+                        : 'border-gray-700'} 
                         ${!variant.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
                       disabled={!variant.inStock}
                     >
@@ -257,13 +283,13 @@ function ProductDetailContent() {
             <button
               onClick={handleAddToCart}
               disabled={addingToCart || !selectedVariant?.inStock}
-              className="w-full py-3 px-4 bg-black text-white dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {addingToCart ? 'Adding...' : selectedVariant?.inStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
             
             {/* Full Description */}
-            <div className="prose dark:prose-invert max-w-none mt-8">
+            <div className="prose prose-invert max-w-none mt-8">
               <h2 className="text-xl font-semibold">Description</h2>
               <div dangerouslySetInnerHTML={{ __html: product.description }} />
             </div>
@@ -272,9 +298,9 @@ function ProductDetailContent() {
             {product.details && Object.keys(product.details).length > 0 && (
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Product Details</h2>
-                <div className="border-t border-gray-200 dark:border-gray-700">
+                <div className="border-t border-gray-700">
                   {Object.entries(product.details).map(([key, value]) => (
-                    <div key={key} className="py-4 border-b border-gray-200 dark:border-gray-700 grid grid-cols-3">
+                    <div key={key} className="py-4 border-b border-gray-700 grid grid-cols-3">
                       <div className="col-span-1 font-medium">{key}</div>
                       <div className="col-span-2">{value}</div>
                     </div>
@@ -287,9 +313,9 @@ function ProductDetailContent() {
             {product.shippingInfo && Object.keys(product.shippingInfo).length > 0 && (
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-                <div className="border-t border-gray-200 dark:border-gray-700">
+                <div className="border-t border-gray-700">
                   {Object.entries(product.shippingInfo).map(([key, value]) => (
-                    <div key={key} className="py-4 border-b border-gray-200 dark:border-gray-700 grid grid-cols-3">
+                    <div key={key} className="py-4 border-b border-gray-700 grid grid-cols-3">
                       <div className="col-span-1 font-medium">{key}</div>
                       <div className="col-span-2">{value}</div>
                     </div>
@@ -304,7 +330,7 @@ function ProductDetailContent() {
                 <h2 className="text-xl font-semibold mb-4">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag, index) => (
-                    <div key={index} className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-sm rounded-full">
+                    <div key={index} className="px-3 py-1 bg-gray-800 text-sm rounded-full">
                       {tag}
                     </div>
                   ))}
@@ -322,7 +348,9 @@ export default function ProductDetailPage() {
   return (
     <>
       <Navbar />
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>}>
         <ProductDetailContent />
       </Suspense>
       <Footer />
