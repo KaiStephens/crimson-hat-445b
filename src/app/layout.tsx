@@ -27,12 +27,18 @@ export default function RootLayout({
             const currentPath = window.location.pathname;
             const currentHostname = window.location.hostname;
             const storeUrl = "${process.env.NEXT_PUBLIC_STORE_URL || 'http://localhost:3000'}";
-            const checkoutDomain = "${process.env.NEXT_PUBLIC_FW_CHECKOUT_DOMAIN || 'checkout.fourthwall.com'}";
+            const checkoutDomain = "${process.env.NEXT_PUBLIC_FW_CHECKOUT_DOMAIN || 'artificialwearables-shop.fourthwall.com'}";
             
             // Check if we're on the Fourthwall domain and not on the checkout path
-            if (currentHostname.includes(checkoutDomain) && currentPath !== '/checkout') {
+            if (currentHostname.includes('fourthwall.com') && currentPath !== '/checkout') {
               // Redirect to our store
               window.location.href = storeUrl;
+            }
+            
+            // Also check for the login prompt that might appear and redirect
+            if (currentHostname === 'checkout.fourthwall.com') {
+              // Redirect to our store-specific domain instead
+              window.location.href = \`https://\${checkoutDomain}\${currentPath}\${window.location.search}\`;
             }
           `}
         </Script>
