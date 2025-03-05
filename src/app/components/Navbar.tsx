@@ -24,50 +24,31 @@ export default function Navbar() {
   }, []);
 
   const handleCheckout = async () => {
+    // Check if cart is empty
     if (cart.length === 0) {
-      alert('Your cart is empty');
+      alert('Your cart is empty. Add some items before checking out.');
       return;
     }
     
     try {
-      setIsCheckingOut(true);
-      
       console.log('Starting checkout process...');
       
-      // First ensure we have a cart ID
-      if (!cartId) {
-        throw new Error('No cart ID available for checkout');
-      }
-      
-      // Call the getCheckoutUrl function from context
+      // Get checkout URL from context - this now handles all the API calls
       const checkoutUrl = await getCheckoutUrl();
       
-      if (checkoutUrl) {
-        console.log(`Checkout successful, redirecting to: ${checkoutUrl}`);
-        
-        // Ensure we're actually redirecting to a valid URL
-        if (!checkoutUrl.startsWith('/') && !checkoutUrl.startsWith('http')) {
-          throw new Error('Invalid checkout URL returned');
-        }
-        
-        // Use router for internal navigation or window.location for external
-        if (checkoutUrl.startsWith('/')) {
-          // For internal routes, use a small delay to ensure state updates
-          setTimeout(() => {
-            window.location.href = checkoutUrl;
-          }, 100);
-        } else {
-          // For external URLs (like Fourthwall checkout), redirect directly
-          window.location.href = checkoutUrl;
-        }
-      } else {
-        throw new Error('No checkout URL returned');
+      if (!checkoutUrl) {
+        console.error('No checkout URL received');
+        alert('There was a problem processing your checkout. Please try again.');
+        return;
       }
+      
+      console.log('Redirecting to checkout:', checkoutUrl);
+      
+      // Redirect to the checkout URL
+      window.location.href = checkoutUrl;
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error('Checkout error:', error);
       alert('There was a problem processing your checkout. Please try again.');
-    } finally {
-      setIsCheckingOut(false);
     }
   };
 

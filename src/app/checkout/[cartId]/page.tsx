@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useCart } from '@/app/context/CartContext';
 import Navbar from '@/app/components/Navbar';
@@ -11,7 +12,7 @@ export default function CheckoutPage() {
   const params = useParams();
   const router = useRouter();
   const cartId = params.cartId as string;
-  const { cart, cartTotal, clearCart, isLoading: isCartLoading, cartId: contextCartId } = useCart();
+  const { cart, cartTotal, clearCart, isLoading: isCartLoading, cartId: contextCartId, getCheckoutUrl } = useCart();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +51,7 @@ export default function CheckoutPage() {
       try {
         setIsLoading(true);
         setCartError(false);
+        setError(null);
         
         if (!cartId) {
           throw new Error('Cart ID is missing');
@@ -65,7 +67,7 @@ export default function CheckoutPage() {
         
         if (!cartData || !cartData.items || cartData.items.length === 0) {
           setCartError(true);
-          throw new Error('Cart is empty');
+          throw new Error('Your shopping cart is empty');
         }
         
         // Set cart items for display in the checkout
@@ -73,7 +75,7 @@ export default function CheckoutPage() {
           id: item.id || Math.random().toString(36).substring(2, 15),
           variantId: item.variant.id,
           name: item.variant.name,
-          price: item.variant.unitPrice.value,
+          price: item.variant.unitPrice?.value || item.variant.price || 0,
           quantity: item.quantity,
           imageUrl: item.variant.images?.[0]?.url || '/placeholder-image.jpg',
         })));
@@ -102,16 +104,21 @@ export default function CheckoutPage() {
     
     try {
       setIsSubmitting(true);
+      setError(null);
       
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!cartId) {
+        throw new Error('Cart ID is missing');
+      }
       
-      // In a real implementation, you would send the order to the server
-      // For now, we'll just clear the cart and redirect
-      clearCart();
+      // Call the getCheckoutUrl function from the cart context
+      const checkoutUrl = await getCheckoutUrl();
       
-      // Redirect to order confirmation
-      router.push('/checkout/success');
+      if (!checkoutUrl) {
+        throw new Error('Failed to create checkout');
+      }
+      
+      // Redirect to the success page
+      router.push(checkoutUrl);
     } catch (error) {
       console.error('Error submitting order:', error);
       setError('Failed to process your order. Please try again.');
@@ -132,6 +139,7 @@ export default function CheckoutPage() {
             <div className="h-40 bg-gray-200 dark:bg-gray-800 rounded"></div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -152,14 +160,15 @@ export default function CheckoutPage() {
             </button>
             {cartError && (
               <button
-                onClick={() => router.push('/cart')}
+                onClick={() => router.push('/')}
                 className="px-6 py-3 bg-transparent border border-black text-black dark:border-white dark:text-white"
               >
-                View Cart
+                View Products
               </button>
             )}
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -190,9 +199,22 @@ export default function CheckoutPage() {
               <div className="space-y-4 mb-6">
                 {displayItems.map(item => (
                   <div key={item.id} className="flex justify-between">
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Qty: {item.quantity}</p>
+                    <div className="flex items-center">
+                      {item.imageUrl && (
+                        <div className="w-10 h-10 rounded overflow-hidden mr-3 hidden sm:block">
+                          <Image 
+                            src={item.imageUrl}
+                            alt={item.name}
+                            width={40}
+                            height={40}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Qty: {item.quantity}</p>
+                      </div>
                     </div>
                     <p>${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
@@ -210,6 +232,12 @@ export default function CheckoutPage() {
             {/* Checkout form */}
             <div className="md:col-span-2 bg-white dark:bg-gray-900 p-6 rounded shadow-sm">
               <h2 className="text-xl font-medium mb-4">Payment Details</h2>
+              
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded">
+                  {error}
+                </div>
+              )}
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

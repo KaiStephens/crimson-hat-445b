@@ -4,14 +4,24 @@ import { useState, useRef, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { motion, useInView } from 'framer-motion';
 
+interface ProductImage {
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
 interface Product {
   id: string;
   name: string;
   price: number;
+  formattedPrice?: string;
   imageUrl: string;
+  images?: ProductImage[];
   category?: string;
   slug: string;
   description?: string;
+  shortDescription?: string;
   variants?: any[];
 }
 
@@ -28,19 +38,44 @@ export default function FeaturedProducts() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/products');
+        
+        // Fetch all products with a 10-second timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch('/api/products', {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error(`Failed to fetch products: ${response.status}`);
         }
         
         const data = await response.json();
         
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid response format');
+        }
+        
         // Use only the first 4 products for the featured section
-        setProducts(data.slice(0, 4));
+        // Sort by newest first (if createdAt is available)
+        const sortedProducts = [...data].sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          return 0;
+        });
+        
+        setProducts(sortedProducts.slice(0, 4));
       } catch (err) {
         console.error('Error fetching products:', err);
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          setError('Request timed out. Please try again later.');
+        } else {
         setError('Failed to load products. Please try again later.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -125,6 +160,11 @@ export default function FeaturedProducts() {
                 Retry
               </button>
             </div>
+          ) : products.length === 0 ? (
+            // No products found
+            <div className="col-span-full text-center text-gray-400">
+              <p>No products available at this time. Check back later!</p>
+            </div>
           ) : (
             // Products
             products.map((product) => (
@@ -137,9 +177,13 @@ export default function FeaturedProducts() {
                   id={product.id}
                   name={product.name}
                   price={product.price}
+                  formattedPrice={product.formattedPrice}
                   imageUrl={product.imageUrl}
+                  images={product.images}
                   category={product.category}
                   slug={product.slug}
+                  shortDescription={product.shortDescription}
+                  variants={product.variants}
                   onAddToCart={handleAddToCart}
                 />
               </motion.div>

@@ -8,14 +8,28 @@ interface ProductCardProps {
   id: string;
   name: string;
   price: number;
+  formattedPrice?: string;
   imageUrl: string;
+  images?: { url: string; alt: string; }[];
   slug: string;
   variants?: any[];
   category?: string;
+  shortDescription?: string;
   onAddToCart?: () => void;
 }
 
-export default function ProductCard({ id, name, price, imageUrl, slug, variants, onAddToCart }: ProductCardProps) {
+export default function ProductCard({ 
+  id, 
+  name, 
+  price, 
+  formattedPrice,
+  imageUrl, 
+  images,
+  slug, 
+  variants, 
+  shortDescription,
+  onAddToCart 
+}: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -30,11 +44,16 @@ export default function ProductCard({ id, name, price, imageUrl, slug, variants,
       
       // Use the first variant if variants are provided, otherwise use a default one
       let variantId;
+      let variantName = '';
+      let variantPrice = price;
       
       if (variants && variants.length > 0) {
         // Find first in-stock variant if available
         const inStockVariant = variants.find(v => v.inStock !== false);
-        variantId = inStockVariant ? inStockVariant.id : variants[0].id;
+        const selectedVariant = inStockVariant || variants[0];
+        variantId = selectedVariant.id;
+        variantName = selectedVariant.name;
+        variantPrice = selectedVariant.price;
       } else {
         // Fallback variant ID - This would need to be replaced with a real variant ID
         variantId = id; // Using product ID as fallback
@@ -44,9 +63,11 @@ export default function ProductCard({ id, name, price, imageUrl, slug, variants,
       await addToCart({ 
         id, 
         name, 
-        price, 
+        price: variantPrice,
         imageUrl, 
-        slug 
+        slug,
+        variantId,
+        variantName
       }, variantId);
       
       // Call the parent's onAddToCart if provided
@@ -59,6 +80,9 @@ export default function ProductCard({ id, name, price, imageUrl, slug, variants,
       setIsAdding(false);
     }
   };
+  
+  // Get the display price (either formatted or calculated)
+  const displayPrice = formattedPrice || `$${price.toFixed(2)}`;
   
   return (
     <div
@@ -89,7 +113,10 @@ export default function ProductCard({ id, name, price, imageUrl, slug, variants,
         
         <div>
           <h3 className="text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">{name}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">${price.toFixed(2)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{displayPrice}</p>
+          {shortDescription && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{shortDescription}</p>
+          )}
         </div>
       </a>
       

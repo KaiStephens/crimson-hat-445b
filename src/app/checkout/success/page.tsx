@@ -1,27 +1,61 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
 import { useCart } from '@/app/context/CartContext';
 
-export default function CheckoutSuccessPage() {
+// Separate client component that uses useSearchParams
+function OrderDetails() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderId, setOrderId] = useState<string>('');
+  const [orderDetails, setOrderDetails] = useState<any>(null);
   
   useEffect(() => {
     // Get order ID from URL or generate a random one as fallback
-    const orderIdFromUrl = searchParams.get('orderId');
-    setOrderId(orderIdFromUrl || `ORD-${Math.floor(Math.random() * 1000000)}`);
+    const orderIdFromUrl = searchParams.get('orderId') || '';
+    const checkoutSessionId = searchParams.get('checkoutSessionId') || '';
+    
+    // Use either orderId or checkoutSessionId (from Fourthwall)
+    const displayOrderId = orderIdFromUrl || checkoutSessionId || `ORD-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    setOrderId(displayOrderId);
     
     // Clear the cart when the success page loads
     clearCart();
+    
+    // If we have a checkoutSessionId from Fourthwall, we could fetch more order details
+    // but we'll keep it simple for now
   }, [clearCart, searchParams]);
 
+  return (
+    <div className="space-y-4 mb-8">
+      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+        <h2 className="font-medium mb-2">Order Details</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Order #: {orderId}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Date: {new Date().toLocaleDateString()}</p>
+      </div>
+    </div>
+  );
+}
+
+// Loading fallback
+function OrderDetailsSkeleton() {
+  return (
+    <div className="space-y-4 mb-8">
+      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
+        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/4"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white">
       <Navbar />
@@ -55,13 +89,9 @@ export default function CheckoutSuccessPage() {
             Thank you for your purchase. We&apos;ve received your order and will process it shortly.
           </p>
           
-          <div className="space-y-4 mb-8">
-            <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded">
-              <h2 className="font-medium mb-2">Order Details</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Order #: {orderId}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Date: {new Date().toLocaleDateString()}</p>
-            </div>
-          </div>
+          <Suspense fallback={<OrderDetailsSkeleton />}>
+            <OrderDetails />
+          </Suspense>
           
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link href="/" passHref>

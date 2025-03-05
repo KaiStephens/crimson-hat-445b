@@ -8,24 +8,41 @@ import { useCart } from '../../context/CartContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
+interface ProductImage {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 interface Variant {
   id: string;
   name: string;
   price: number;
+  formattedPrice?: string;
   sku: string;
   inStock: boolean;
+  inventoryCount?: number;
+  attributes?: Record<string, any>;
+  images?: any[];
 }
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  formattedPrice?: string;
+  images: ProductImage[];
   imageUrl: string;
   description: string;
+  shortDescription?: string;
   slug: string;
   variants: Variant[];
   category?: string;
   tags?: string[];
+  details?: Record<string, any>;
+  shippingInfo?: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
 function ProductDetailContent() {
@@ -34,6 +51,7 @@ function ProductDetailContent() {
   
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -50,30 +68,32 @@ function ProductDetailContent() {
         setIsLoading(true);
         setError(null);
         
-        // First get all products
-        const productsResponse = await fetch('/api/products');
+        // Fetch the specific product by slug
+        const productResponse = await fetch(`/api/products?slug=${slug}`);
         
-        if (!productsResponse.ok) {
-          throw new Error('Failed to fetch products');
+        if (!productResponse.ok) {
+          throw new Error('Failed to fetch product');
         }
         
-        const products = await productsResponse.json();
+        const productData = await productResponse.json();
         
-        // Find the product with matching slug
-        const foundProduct = products.find((p: any) => p.slug === slug);
-        
-        if (!foundProduct) {
-          throw new Error('Product not found');
+        if (!productData || productData.error) {
+          throw new Error(productData?.error || 'Product not found');
         }
         
-        console.log('Found product data:', foundProduct);
-        setProduct(foundProduct);
+        console.log('Found product data:', productData);
+        setProduct(productData);
+        
+        // Set the first image as selected
+        if (productData.images && productData.images.length > 0) {
+          setSelectedImage(productData.images[0].url);
+        }
         
         // Select the first variant by default
-        if (foundProduct.variants && foundProduct.variants.length > 0) {
+        if (productData.variants && productData.variants.length > 0) {
           // Find first in-stock variant if available, otherwise select the first one
-          const inStockVariant = foundProduct.variants.find((v: Variant) => v.inStock === true);
-          setSelectedVariant(inStockVariant || foundProduct.variants[0]);
+          const inStockVariant = productData.variants.find((v: Variant) => v.inStock === true);
+          setSelectedVariant(inStockVariant || productData.variants[0]);
         }
       } catch (err) {
         console.error('Error fetching product:', err);
@@ -88,6 +108,10 @@ function ProductDetailContent() {
     }
   }, [slug]);
   
+  const handleImageSelect = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+  };
+  
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
     
@@ -98,200 +122,210 @@ function ProductDetailContent() {
       await addToCart({
         id: product.id,
         name: product.name,
+        slug: product.slug,
+        variantId: selectedVariant.id,
+        variantName: selectedVariant.name,
         price: selectedVariant.price,
-        imageUrl: product.imageUrl,
-        slug: product.slug
+        imageUrl: selectedImage || product.imageUrl
       }, selectedVariant.id);
       
-      // Show a success message or feedback
-      const notification = document.createElement('div');
-      notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in-out';
-      notification.textContent = 'Added to cart';
-      document.body.appendChild(notification);
-      
-      // Remove the notification after a delay
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 2000);
+      setAddingToCart(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      
-      // Show error message
-      const errorNotification = document.createElement('div');
-      errorNotification.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50';
-      errorNotification.textContent = 'Failed to add to cart';
-      document.body.appendChild(errorNotification);
-      
-      // Remove the error notification after a delay
-      setTimeout(() => {
-        if (document.body.contains(errorNotification)) {
-          document.body.removeChild(errorNotification);
-        }
-      }, 2000);
-    } finally {
       setAddingToCart(false);
     }
   };
   
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar />
-      
-      <main className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {isLoading ? (
-            // Loading skeleton
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
-              <div className="aspect-square bg-gray-900"></div>
-              <div>
-                <div className="h-8 bg-gray-900 w-3/4 mb-4"></div>
-                <div className="h-6 bg-gray-900 w-1/4 mb-6"></div>
-                <div className="h-20 bg-gray-900 w-full mb-6"></div>
-                <div className="h-10 bg-gray-900 w-1/2 mb-4"></div>
-                <div className="h-12 bg-gray-900 w-full"></div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-black">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded"></div>
+              <div className="space-y-4">
+                <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+                <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
               </div>
             </div>
-          ) : error ? (
-            // Error state
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-bold text-red-500 mb-4">{error}</h2>
-              <button 
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-red-800 text-white rounded-sm"
-              >
-                Retry
-              </button>
-            </div>
-          ) : product ? (
-            // Product details
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Product Image */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-                className="relative aspect-square bg-gray-100 dark:bg-gray-900 rounded-sm overflow-hidden"
-              >
-                <Image
-                  src={imgError ? fallbackImage : product.imageUrl}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  onError={() => setImgError(true)}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </motion.div>
-              
-              {/* Product Details */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                {product.category && (
-                  <div className="text-sm text-gray-500 mb-2 uppercase tracking-wider">
-                    {product.category}
-                  </div>
-                )}
-                
-                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-                <p className="text-2xl text-gray-300 mb-6">
-                  ${selectedVariant ? selectedVariant.price.toFixed(2) : product.price.toFixed(2)}
-                </p>
-                
-                <div className="mb-6">
-                  <p className="text-gray-400">{product.description || 'No description available.'}</p>
-                </div>
-                
-                {/* Variant Selection */}
-                {product.variants && product.variants.length > 0 && (
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">
-                      Select Size/Variant
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {product.variants.map((variant) => (
-                        <button
-                          key={variant.id}
-                          onClick={() => setSelectedVariant(variant)}
-                          disabled={!variant.inStock}
-                          className={`px-4 py-2 border transition-colors ${
-                            selectedVariant?.id === variant.id
-                              ? 'border-white bg-white bg-opacity-10'
-                              : 'border-gray-700 hover:border-gray-500'
-                          } ${!variant.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {variant.name}
-                          {!variant.inStock && ' (Out of stock)'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Tags if available */}
-                {product.tags && product.tags.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex flex-wrap gap-2">
-                      {product.tags.map((tag, index) => (
-                        <span 
-                          key={index} 
-                          className="inline-block px-2 py-1 text-xs bg-gray-800 rounded"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Add to Cart Button */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={addingToCart || (product.variants && product.variants.length > 0 && !selectedVariant?.inStock)}
-                  className={`w-full py-3 px-6 transition-colors text-black bg-white hover:bg-gray-100 disabled:bg-gray-400 disabled:cursor-not-allowed`}
-                >
-                  {addingToCart ? (
-                    <span className="inline-block animate-spin mr-2">⟳</span>
-                  ) : null}
-                  {selectedVariant && !selectedVariant.inStock
-                    ? 'Out of Stock'
-                    : 'Add to Cart'
-                  }
-                </button>
-              </motion.div>
-            </div>
-          ) : (
-            // Product not found
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-bold mb-4">Product not found</h2>
-              <a href="/products" className="underline text-blue-500">
-                Back to all products
-              </a>
-            </div>
-          )}
+          </div>
         </div>
-      </main>
-      
-      <Footer />
+      </div>
+    );
+  }
+  
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-black">
+        <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
+          <p className="mb-6">{error || "Product not found"}</p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-6 py-3 bg-black text-white dark:bg-white dark:text-black"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Product Images */}
+          <div className="space-y-4">
+            {/* Main Image */}
+            <div className="relative h-[500px] w-full bg-white dark:bg-gray-900 overflow-hidden">
+              <Image
+                src={selectedImage || product.imageUrl || fallbackImage}
+                alt={product.name}
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+                onError={() => setImgError(true)}
+              />
+            </div>
+            
+            {/* Thumbnail Gallery */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex space-x-2 overflow-x-auto pb-2">
+                {product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleImageSelect(image.url)}
+                    className={`relative w-20 h-20 bg-white dark:bg-gray-900 flex-shrink-0 ${selectedImage === image.url ? 'border-2 border-black dark:border-white' : 'border border-gray-200 dark:border-gray-700'}`}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={`${product.name} - view ${index + 1}`}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Product Details */}
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold">{product.name}</h1>
+            
+            <p className="text-2xl font-semibold">
+              {selectedVariant?.formattedPrice || product.formattedPrice || `$${selectedVariant?.price || product.price}`}
+            </p>
+            
+            {/* Short Description */}
+            {product.shortDescription && (
+              <div className="text-gray-600 dark:text-gray-300 text-lg">
+                {product.shortDescription}
+              </div>
+            )}
+            
+            {/* Variant Selection */}
+            {product.variants.length > 1 && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Select {Object.keys(product.variants[0]?.attributes || {}).length > 0 ? 'Options' : 'Size'}:
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-4 py-2 border ${selectedVariant?.id === variant.id 
+                        ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black' 
+                        : 'border-gray-300 dark:border-gray-700'} 
+                        ${!variant.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={!variant.inStock}
+                    >
+                      {variant.name}
+                      {!variant.inStock && " (Out of Stock)"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Add to Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              disabled={addingToCart || !selectedVariant?.inStock}
+              className="w-full py-3 px-4 bg-black text-white dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {addingToCart ? 'Adding...' : selectedVariant?.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </button>
+            
+            {/* Full Description */}
+            <div className="prose dark:prose-invert max-w-none mt-8">
+              <h2 className="text-xl font-semibold">Description</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.description }} />
+            </div>
+            
+            {/* Product Details Table */}
+            {product.details && Object.keys(product.details).length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Product Details</h2>
+                <div className="border-t border-gray-200 dark:border-gray-700">
+                  {Object.entries(product.details).map(([key, value]) => (
+                    <div key={key} className="py-4 border-b border-gray-200 dark:border-gray-700 grid grid-cols-3">
+                      <div className="col-span-1 font-medium">{key}</div>
+                      <div className="col-span-2">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Shipping Info */}
+            {product.shippingInfo && Object.keys(product.shippingInfo).length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+                <div className="border-t border-gray-200 dark:border-gray-700">
+                  {Object.entries(product.shippingInfo).map(([key, value]) => (
+                    <div key={key} className="py-4 border-b border-gray-200 dark:border-gray-700 grid grid-cols-3">
+                      <div className="col-span-1 font-medium">{key}</div>
+                      <div className="col-span-2">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Tags</h2>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag, index) => (
+                    <div key={index} className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-sm rounded-full">
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// Main page component with Suspense boundary
 export default function ProductDetailPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-10 w-10 border-4 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Loading product details...</p>
-        </div>
-      </div>
-    }>
-      <ProductDetailContent />
-    </Suspense>
+    <>
+      <Navbar />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProductDetailContent />
+      </Suspense>
+      <Footer />
+    </>
   );
 } 

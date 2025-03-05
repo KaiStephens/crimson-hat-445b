@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Use the storefront token for public API access
+const STOREFRONT_TOKEN = process.env.STOREFRONT_TOKEN || 'ptkn_dda67524-d1dc-4c1f-9a81-1cb75185af20';
+const STOREFRONT_API_URL = 'https://storefront-api.fourthwall.com/v1';
+
 export async function GET(request: NextRequest) {
   try {
     // Get cart ID from query parameter
@@ -10,21 +14,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Cart ID is required' }, { status: 400 });
     }
 
-    // Call the Fourthwall API to get cart data
-    const response = await fetch(`https://api.fourthwall.com/api/v1/shop-api/carts/${cartId}`, {
+    console.log('Fetching cart with ID:', cartId);
+
+    // Call the Fourthwall Storefront API to get cart data
+    const response = await fetch(`${STOREFRONT_API_URL}/carts/${cartId}?storefront_token=${STOREFRONT_TOKEN}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${process.env.FOURTHWALL_API_KEY}`,
         'Content-Type': 'application/json',
-        'X-Shop-Id': process.env.FOURTHWALL_SHOP_ID || '',
       },
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error fetching cart from Fourthwall:', errorData);
+      console.error('Error fetching cart:', errorData);
       return NextResponse.json(
-        { error: 'Failed to fetch cart data from Fourthwall' }, 
+        { error: 'Failed to fetch cart data' }, 
         { status: response.status }
       );
     }
@@ -46,43 +50,34 @@ export async function POST(request: NextRequest) {
     const { variantId, quantity = 1 } = body;
     
     if (!variantId) {
+      console.error('Missing variantId in request body:', body);
       return NextResponse.json({ error: 'Variant ID is required' }, { status: 400 });
     }
 
-    // If cartId is provided, add to existing cart
-    const cartId = body.cartId || null;
+    // Create a new cart with the Fourthwall Storefront API
+    console.log('Creating new cart with item:', { variantId, quantity });
     
-    let url = 'https://api.fourthwall.com/api/v1/shop-api/carts';
-    let method = 'POST';
-    let requestBody: any = { items: [{ variantId, quantity }] };
-    
-    // If cart ID exists, update the cart instead of creating a new one
-    if (cartId) {
-      url = `${url}/${cartId}/items`;
-      method = 'POST';
-      requestBody = { variantId, quantity };
-    }
-
-    const response = await fetch(url, {
-      method,
+    const response = await fetch(`${STOREFRONT_API_URL}/carts?storefront_token=${STOREFRONT_TOKEN}`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.FOURTHWALL_API_KEY}`,
         'Content-Type': 'application/json',
-        'X-Shop-Id': process.env.FOURTHWALL_SHOP_ID || '',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        items: [{ variantId, quantity }]
+      }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error in cart operation:', errorData);
+      console.error('Error in cart creation:', errorData);
       return NextResponse.json(
-        { error: 'Failed to perform cart operation' }, 
+        { error: 'Failed to create cart', details: errorData }, 
         { status: response.status }
       );
     }
 
     const data = await response.json();
+    console.log('Cart created successfully:', data.id);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Unexpected error in cart API route:', error);
@@ -103,12 +98,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Cart ID is required' }, { status: 400 });
     }
 
-    const response = await fetch(`https://api.fourthwall.com/api/v1/shop-api/carts/${cartId}`, {
+    console.log('Deleting cart with ID:', cartId);
+
+    const response = await fetch(`${STOREFRONT_API_URL}/carts/${cartId}?storefront_token=${STOREFRONT_TOKEN}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${process.env.FOURTHWALL_API_KEY}`,
         'Content-Type': 'application/json',
-        'X-Shop-Id': process.env.FOURTHWALL_SHOP_ID || '',
       },
     });
 

@@ -106,39 +106,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = async (product: any, variantId: string, quantity = 1) => {
     try {
       setIsLoading(true);
+      setError(null);
       
-      let response;
-      
-      // If we don't have a cart yet, create one
-      if (!cartId) {
-        response = await fetch('/api/cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            items: [
-              {
-                variantId,
-                quantity
-              }
-            ]
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to create cart');
-        }
-        
-        const newCart = await response.json();
-        setCartId(newCart.id);
-        localStorage.setItem('cartId', newCart.id);
-        
-        // Fetch the cart to get the updated items
-        await loadCart();
-      } else {
-        // Add to existing cart
-        response = await fetch('/api/cart/items', {
+      // If we have an existing cart, add items to it
+      if (cartId) {
+        const response = await fetch('/api/cart/items', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -155,21 +127,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         });
         
         if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Failed to add item to cart:', errorData);
           throw new Error('Failed to add item to cart');
         }
         
-        // Optimistically update the cart
-        const newItem: CartItem = {
-          id: Math.random().toString(36).substring(2, 15), // Temporary ID until we refresh
-          variantId,
-          name: product.name,
-          price: product.price,
-          quantity,
-          imageUrl: product.imageUrl,
-          productSlug: product.slug,
-        };
-        
-        // Check if the item is already in the cart
+        // After successful API call, optimistically update the cart
         const existingItemIndex = cart.findIndex(item => item.variantId === variantId);
         
         if (existingItemIndex >= 0) {
@@ -179,11 +142,59 @@ export function CartProvider({ children }: { children: ReactNode }) {
           setCart(updatedCart);
         } else {
           // Add new item to cart
+          const newItem: CartItem = {
+            id: Math.random().toString(36).substring(2, 15), // Temporary ID until we refresh
+            variantId,
+            name: product.name,
+            price: product.price,
+            quantity,
+            imageUrl: product.imageUrl || product.images?.[0]?.url || '/placeholder-image.jpg',
+            productSlug: product.slug,
+          };
           setCart(prev => [...prev, newItem]);
         }
+      } else {
+        // Create a new cart
+        const response = await fetch('/api/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            variantId,
+            quantity
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Failed to create cart:', errorData);
+          throw new Error('Failed to create cart');
+        }
+        
+        const newCart = await response.json();
+        console.log('New cart created:', newCart);
+        
+        if (newCart && newCart.id) {
+          setCartId(newCart.id);
+          localStorage.setItem('cartId', newCart.id);
+          
+          // Add the item to our local cart state
+          const newItem: CartItem = {
+            id: Math.random().toString(36).substring(2, 15),
+            variantId,
+            name: product.name,
+            price: product.price,
+            quantity,
+            imageUrl: product.imageUrl || product.images?.[0]?.url || '/placeholder-image.jpg',
+            productSlug: product.slug,
+          };
+          
+          setCart([newItem]);
+        } else {
+          throw new Error('Invalid cart response from server');
+        }
       }
-      
-      setError(null);
     } catch (err) {
       console.error('Error adding to cart:', err);
       setError(err instanceof Error ? err.message : 'Failed to add to cart');
@@ -267,34 +278,41 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Get checkout URL 
   const getCheckoutUrl = async (): Promise<string> => {
-    if (!cartId) {
-      throw new Error('No cart available');
-    }
-    
     try {
+      if (!cartId) {
+        throw new Error('No cart available for checkout');
+      }
+
       setIsLoading(true);
       
+      // Call our server-side checkout API
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          cartId,
-        }),
+        body: JSON.stringify({ cartId }),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error creating checkout:', errorData);
+        console.error('Checkout API error:', errorData);
         throw new Error('Failed to create checkout');
       }
       
       const data = await response.json();
-      return data.checkoutUrl;
+      
+      // The API should return data with a redirectUrl property
+      if (!data || !data.redirectUrl) {
+        throw new Error('Invalid checkout response');
+      }
+      
+      console.log('Checkout URL retrieved successfully');
+      return data.redirectUrl;
     } catch (error) {
-      console.error('Error creating checkout:', error);
-      throw error;
+      console.error('Error generating checkout URL:', error);
+      setError('Failed to initiate checkout. Please try again.');
+      return '';
     } finally {
       setIsLoading(false);
     }
