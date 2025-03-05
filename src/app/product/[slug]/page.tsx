@@ -164,17 +164,17 @@ function ProductDetailContent() {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-24">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-full max-w-6xl px-4 py-24">
           <div className="animate-pulse space-y-4">
-            <div className="h-10 bg-gray-800 rounded w-1/4"></div>
+            <div className="h-10 bg-[#0f0f11]/40 backdrop-blur-sm rounded w-1/4"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="h-96 bg-gray-800 rounded"></div>
+              <div className="h-96 bg-[#0f0f11]/40 backdrop-blur-sm rounded"></div>
               <div className="space-y-4">
-                <div className="h-8 bg-gray-800 rounded w-3/4"></div>
-                <div className="h-6 bg-gray-800 rounded w-1/2"></div>
-                <div className="h-32 bg-gray-800 rounded"></div>
-                <div className="h-10 bg-gray-800 rounded w-1/3"></div>
+                <div className="h-8 bg-[#0f0f11]/40 backdrop-blur-sm rounded w-3/4"></div>
+                <div className="h-6 bg-[#0f0f11]/40 backdrop-blur-sm rounded w-1/2"></div>
+                <div className="h-32 bg-[#0f0f11]/40 backdrop-blur-sm rounded"></div>
+                <div className="h-10 bg-[#0f0f11]/40 backdrop-blur-sm rounded w-1/3"></div>
               </div>
             </div>
           </div>
@@ -185,13 +185,13 @@ function ProductDetailContent() {
   
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-32 text-center">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-[#0f0f11]/50 backdrop-blur-sm rounded-lg text-white w-full max-w-2xl mx-auto px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
           <p className="mb-6">{error || "Product not found"}</p>
           <button
             onClick={() => window.history.back()}
-            className="px-6 py-3 bg-white text-black"
+            className="px-6 py-3 bg-white text-black rounded-md"
           >
             Go Back
           </button>
@@ -201,13 +201,13 @@ function ProductDetailContent() {
   }
   
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white">
       <div className="max-w-6xl mx-auto px-4 py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative h-[500px] w-full bg-gray-900 overflow-hidden">
+            <div className="relative h-[500px] w-full bg-[#0f0f11]/50 rounded-lg overflow-hidden">
               <Image
                 src={selectedImage || product.imageUrl || fallbackImage}
                 alt={product.name}
@@ -225,7 +225,7 @@ function ProductDetailContent() {
                   <button
                     key={index}
                     onClick={() => handleImageSelect(image.url)}
-                    className={`relative w-20 h-20 bg-gray-900 flex-shrink-0 ${selectedImage === image.url ? 'border-2 border-white' : 'border border-gray-700'}`}
+                    className={`relative w-20 h-20 bg-[#0f0f11]/50 flex-shrink-0 rounded-md ${selectedImage === image.url ? 'border-2 border-white' : 'border border-gray-700'}`}
                   >
                     <Image
                       src={image.url}
@@ -240,7 +240,7 @@ function ProductDetailContent() {
           </div>
           
           {/* Product Details */}
-          <div className="space-y-6">
+          <div className="space-y-6 bg-[#0f0f11]/50 backdrop-blur-sm p-6 rounded-lg">
             <h1 className="text-3xl font-bold">{product.name}</h1>
             
             <p className="text-2xl font-semibold">
@@ -265,7 +265,7 @@ function ProductDetailContent() {
                     <button
                       key={variant.id}
                       onClick={() => setSelectedVariant(variant)}
-                      className={`px-4 py-2 border ${selectedVariant?.id === variant.id 
+                      className={`px-4 py-2 border rounded ${selectedVariant?.id === variant.id 
                         ? 'border-white bg-white text-black' 
                         : 'border-gray-700'} 
                         ${!variant.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -283,7 +283,7 @@ function ProductDetailContent() {
             <button
               onClick={handleAddToCart}
               disabled={addingToCart || !selectedVariant?.inStock}
-              className="w-full py-3 px-4 bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-white text-black rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {addingToCart ? 'Adding...' : selectedVariant?.inStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
@@ -330,7 +330,7 @@ function ProductDetailContent() {
                 <h2 className="text-xl font-semibold mb-4">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag, index) => (
-                    <div key={index} className="px-3 py-1 bg-gray-800 text-sm rounded-full">
+                    <div key={index} className="px-3 py-1 bg-[#0f0f11]/50 text-sm rounded-full">
                       {tag}
                     </div>
                   ))}
@@ -348,8 +348,8 @@ export default function ProductDetailPage() {
   return (
     <>
       <Navbar />
-      <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-white">Loading...</div>
       </div>}>
         <ProductDetailContent />
       </Suspense>

@@ -41,14 +41,14 @@ export default function AnimatedBackground() {
       constructor() {
         this.x = Math.random() * canvasWidth;
         this.y = Math.random() * canvasHeight;
-        this.size = Math.random() * 6 + 2; // Slightly larger particles
+        this.size = Math.random() * 6 + 3; // Slightly larger particles
         this.speedX = Math.random() * 0.2 - 0.1;
         this.speedY = Math.random() * 0.2 - 0.1;
         
-        // More interesting colors with a hint of blue
-        const opacity = Math.random() * 0.1 + 0.05;
-        const hue = Math.random() > 0.7 ? 220 : 240; // Slight variation in blue hue
-        this.color = `hsla(${hue}, 70%, 70%, ${opacity})`;
+        // More visible neutral colors
+        const opacity = Math.random() * 0.25 + 0.1; // Increased opacity
+        const brightness = Math.floor(Math.random() * 60) + 80; // 80-140 brightness range (more visible)
+        this.color = `rgba(${brightness}, ${brightness}, ${brightness}, ${opacity})`;
         
         // Different shapes for variety
         const shapes = ['circle', 'square', 'line'];
@@ -75,7 +75,7 @@ export default function AnimatedBackground() {
         if (!ctx) return;
         ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.size / 4;
+        ctx.lineWidth = this.size / 3;
         
         // Draw different shapes
         switch(this.shape) {
@@ -107,9 +107,9 @@ export default function AnimatedBackground() {
       }
     }
     
-    // Create more particles for a richer effect, but still keep performance in mind
+    // Create more particles for a richer effect
     const particles: Particle[] = [];
-    const particleCount = Math.min(30, Math.floor(window.innerWidth / 80));
+    const particleCount = Math.min(50, Math.floor(window.innerWidth / 60)); // Increased particle count
     
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
@@ -119,7 +119,7 @@ export default function AnimatedBackground() {
     const createGradient = () => {
       if (!ctx || !canvas) return null;
       
-      // Main background gradient - subtle radial
+      // Main background gradient - subtle radial with no blue
       const mainGradient = ctx.createRadialGradient(
         canvasWidth / 2,
         canvasHeight / 2,
@@ -129,8 +129,8 @@ export default function AnimatedBackground() {
         canvasWidth * 0.8
       );
       
-      mainGradient.addColorStop(0, 'rgba(30, 30, 40, 0)');
-      mainGradient.addColorStop(1, 'rgba(10, 10, 20, 0.05)');
+      mainGradient.addColorStop(0, 'rgba(20, 20, 20, 0)');
+      mainGradient.addColorStop(1, 'rgba(5, 5, 5, 0.05)');
       
       return mainGradient;
     };
@@ -141,7 +141,7 @@ export default function AnimatedBackground() {
     const connectParticles = () => {
       if (!ctx) return;
       
-      const maxDistance = canvasWidth * 0.07; // Adjust based on screen size
+      const maxDistance = canvasWidth * 0.1; // Increased connection distance
       
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -150,9 +150,9 @@ export default function AnimatedBackground() {
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance < maxDistance) {
-            // Make line opacity based on distance
+            // More visible connecting lines
             const opacity = 1 - (distance / maxDistance);
-            ctx.strokeStyle = `rgba(100, 150, 255, ${opacity * 0.03})`;
+            ctx.strokeStyle = `rgba(150, 150, 150, ${opacity * 0.08})`; // Brighter and more visible
             ctx.lineWidth = 1;
             
             ctx.beginPath();
@@ -172,8 +172,8 @@ export default function AnimatedBackground() {
       if (!ctx || !canvas) return;
       frameCount++;
       
-      // Clear canvas with slight trail effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.01)';
+      // Clear canvas with slight trail effect - more visible trails
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Only redraw gradient occasionally to save performance
@@ -193,10 +193,8 @@ export default function AnimatedBackground() {
         particle.draw();
       });
       
-      // Draw connecting lines (can be heavy, so only do occasionally)
-      if (frameCount % 2 === 0) {
-        connectParticles();
-      }
+      // Draw connecting lines
+      connectParticles();
       
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -214,7 +212,7 @@ export default function AnimatedBackground() {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full pointer-events-none -z-50"
-      style={{ opacity: 0.7 }}
+      style={{ opacity: 1 }} // Full opacity
     />
   );
 } 
